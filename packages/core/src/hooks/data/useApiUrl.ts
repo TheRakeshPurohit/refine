@@ -1,10 +1,14 @@
-import { useContext } from "react";
+import { pickNotDeprecated } from "@definitions/index";
+import { useDataProvider, useResource } from "@hooks";
 
-import { DataContext } from "@contexts/data";
-import { IDataContext } from "../../interfaces";
+export const useApiUrl = (dataProviderName?: string): string => {
+  const dataProvider = useDataProvider();
+  const { resource } = useResource();
 
-export const useApiUrl = (): string => {
-    const { getApiUrl } = useContext<IDataContext>(DataContext);
+  const { getApiUrl } = dataProvider(
+    dataProviderName ??
+      pickNotDeprecated(resource?.meta, resource?.options)?.dataProviderName,
+  );
 
-    return getApiUrl();
+  return getApiUrl();
 };

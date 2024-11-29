@@ -4,9 +4,10 @@ node_modules
 .cache
 dist
 .rpt2_cache
-.husky
 coverage
-.vscode
+build
+.docusaurus
+.svelte-kit
 
 # misc
 .DS_Store
@@ -16,16 +17,22 @@ coverage
 .env.test.local
 .env.production.local
 
-!examples/fineFoods/admin/.env
+!examples/finefoods-antd/.env
+!examples/finefoods-material-ui/.env
+!examples/store/.env
+
 
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# eslint cache
-example/.eslintcache
-example/.cache
-
-examples/**/*/package-lock.json
-!examples/fineFoods/package-lock.json
+examples/**/package-lock.json
 .next
+
+# cli tool
+/refine
+
+.biome/reports
+
+# nx daemon
+.nx

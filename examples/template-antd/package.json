@@ -1,0 +1,36 @@
+{
+  "name": "template-antd",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc && refine build",
+    "dev": "refine dev",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "refine": "refine",
+    "start": "refine start"
+  },
+  "dependencies": {
+    "@refinedev/antd": "^5.44.0",
+    "@refinedev/cli": "^2.16.39",
+    "@refinedev/core": "^4.56.0",
+    "@refinedev/react-router-v6": "^4.6.0",
+    "@refinedev/simple-rest": "^5.0.8",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-router-dom": "^6.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^18.16.2",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "@typescript-eslint/eslint-plugin": "5.48.0",
+    "@typescript-eslint/parser": "5.48.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "eslint": "^8.24.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.3.4",
+    "typescript": "^5.4.2",
+    "vite": "^5.1.6"
+  }
+}

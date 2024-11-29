@@ -1,7 +1,3 @@
-import { RouterProvider } from "./routerProvider";
+export * from "./app/index.js";
 
-export { default as Link } from "next/link";
-
-export * from "./nextRouteComponent";
-export * from "./checkAuthentication";
-export default RouterProvider;
+export { default } from "./app/index.js";

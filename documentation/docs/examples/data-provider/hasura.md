@@ -1,13 +1,38 @@
 ---
 id: hasura
 title: Hasura
+example-tags: [data-provider, live-provider]
 ---
 
-[View Source](https://github.com/pankod/refine/tree/master/examples/dataProvider/hasura)
+Any REST or GraphQL custom backend work integrated with Refine. Refine [Hasura](https://hasura.io/) GraphQL Data Provider comes out-of-the-box. Thanks to Refine, you can connect to your Hasura database and create special queries and use your data easily. This example shows in detail how you can use the data in your Hasura database with Refine project.
 
-<iframe src="https://codesandbox.io/embed/refine-hasura-example-sx3mo?autoresize=1&fontsize=14&theme=dark&view=preview"
-     style={{width: "100%", height:"80vh", border: "0px", borderRadius: "8px", overflow:"hidden"}}
-     title="refine-hasura-example"
-     allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
-     sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
-   ></iframe>
+## ID Data Type
+
+By default, the data provider assume that your `ID` type is `uuid`, you can change this behavior by using the `idType` option. You can pass `Int` or `uuid` as the value of `idType` option or use function to determine the `idType` based on the resource name.
+
+#### Passing 'Int' or 'uuid' to `idType`
+
+This will allow you to determine the `idType` for all resources.
+
+```tsx
+const myDataProvider = dataProvider(client, {
+  idType: "Int",
+});
+```
+
+#### Passing function to `idType`
+
+This will allow you to determine the `idType` based on the resource name.
+
+```tsx
+const idTypeMap: Record<string, "Int" | "uuid"> = {
+  users: "Int",
+  posts: "uuid",
+};
+
+const myDataProvider = dataProvider(client, {
+  idType: (resource) => idTypeMap[resource] ?? "uuid",
+});
+```
+
+<CodeSandboxExample path="data-provider-hasura" />

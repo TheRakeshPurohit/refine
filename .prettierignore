@@ -4,3 +4,11 @@ node_modules/
 .snapshots/
 *.min.js
 packages/**/coverage/
+CHANGELOG.md
+*.js
+*.jsx
+*.ts
+*.tsx
+*.json
+
+/.nx/cache

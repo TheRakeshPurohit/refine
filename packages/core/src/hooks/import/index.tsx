@@ -1,321 +1,337 @@
-import React from "react";
 import { useEffect, useState } from "react";
-import { ButtonProps, notification, UploadProps, Progress } from "antd";
-import { UploadChangeParam } from "antd/lib/upload";
-import {
-    useCreate,
-    useTranslate,
-    useCreateMany,
-    useResourceWithRoute,
-    useRouterContext,
-} from "@hooks";
-import {
-    MapDataFn,
-    BaseRecord,
-    HttpError,
-    ResourceRouterParams,
-    MetaDataQuery,
-} from "../../interfaces";
-import { parse, ParseConfig } from "papaparse";
-import { importCSVMapper } from "@definitions";
+
 import chunk from "lodash/chunk";
-import { UseCreateReturnType } from "@hooks/data/useCreate";
-import { UseCreateManyReturnType } from "@hooks/data/useCreateMany";
+import papaparse from "papaparse";
+
+import {
+  importCSVMapper,
+  pickNotDeprecated,
+  sequentialPromises,
+} from "@definitions";
+import { useCreate, useCreateMany, useMeta, useResource } from "@hooks";
+
+import type {
+  BaseRecord,
+  HttpError,
+  MetaQuery,
+} from "../../contexts/data/types";
+import type { UseCreateReturnType } from "../../hooks/data/useCreate";
+import type { UseCreateManyReturnType } from "../../hooks/data/useCreateMany";
+import type { MapDataFn } from "../export/types";
 
 export type ImportSuccessResult<TVariables, TData> = {
-    request: TVariables[];
-    type: "success";
-    response: TData[];
+  request: TVariables[];
+  type: "success";
+  response: TData[];
 };
 
 export type ImportErrorResult<TVariables> = {
-    request: TVariables[];
-    type: "error";
-    response: HttpError[];
+  request: TVariables[];
+  type: "error";
+  response: HttpError[];
 };
 
 export type OnFinishParams<TVariables, TData> = {
-    succeeded: ImportSuccessResult<TVariables, TData>[];
-    errored: ImportErrorResult<TVariables>[];
+  succeeded: ImportSuccessResult<TVariables, TData>[];
+  errored: ImportErrorResult<TVariables>[];
 };
 
-type ImportOptions<
-    TItem,
-    TVariables = any,
-    TData extends BaseRecord = BaseRecord,
+export type OnProgressParams = {
+  totalAmount: number;
+  processedAmount: number;
+};
+
+export type ImportOptions<
+  TItem,
+  TVariables = any,
+  TData extends BaseRecord = BaseRecord,
 > = {
-    resourceName?: string;
-    mapData?: MapDataFn<TItem, TVariables>;
-    paparseOptions?: ParseConfig;
-    batchSize?: number;
-    onFinish?: (results: OnFinishParams<TVariables, TData>) => void;
-    metaData?: MetaDataQuery;
+  /**
+   * Resource name for API data interactions.
+   * @default Resource name that it reads from route
+   * @deprecated `resourceName` is deprecated. Use `resource` instead.
+   */
+  resourceName?: string;
+  /**
+   * Resource name for API data interactions.
+   * @default Resource name that it reads from route
+   */
+  resource?: string;
+  /**
+   * A mapping function that runs for every record. Mapped data will be included in the file contents.
+   */
+  mapData?: MapDataFn<TItem, TVariables>;
+  /**
+   * Custom Papa Parse options.
+   * @type [`ParseConfig`](https://www.papaparse.com/docs)
+   */
+  paparseOptions?: papaparse.ParseConfig;
+  /**
+   * Requests batch size. If it is 1, all records are sent one by one. By default, it is [`Number.MAX_SAFE_INTEGER`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER) to send all records in one batch. If it is more than 1, `createMany` should be implemented on DataProvider.
+   */
+  batchSize?: number;
+  /**
+   * Called with errors and successful responses when all requests are sent.
+   */
+  onFinish?: (results: OnFinishParams<TVariables, TData>) => void;
+  /**
+   *  Metadata query for `dataProvider`
+   */
+  meta?: MetaQuery;
+  /**
+   *  Metadata query for `dataProvider`
+   * @deprecated `metaData` is deprecated with refine@4, refine will pass `meta` instead, however, we still support `metaData` for backward compatibility.
+   */
+  metaData?: MetaQuery;
+  /**
+   *  A callback function that returns a current state of uploading process.
+   *
+   *  Ex: `percentage = onProgressParams.processedAmount / onProgressParams.totalAmount * 100`
+   */
+  onProgress?: (onProgressParams: OnProgressParams) => void;
+  /**
+   * If there is more than one `dataProvider`, you should use the `dataProviderName` that you will use.
+   */
+  dataProviderName?: string;
 };
 
 export type CreatedValuesType<TVariables, TData> =
-    | ImportSuccessResult<TVariables, TData>
-    | ImportErrorResult<TVariables>;
+  | ImportSuccessResult<TVariables, TData>
+  | ImportErrorResult<TVariables>;
+
+export type HandleChangeType<TVariables, TData> = (onChangeParams: {
+  file: Partial<File>;
+}) => Promise<CreatedValuesType<TVariables, TData>[]>;
+
+export type UseImportInputPropsType = {
+  type: "file";
+  accept: string;
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+};
+
+export type UseImportReturnType<
+  TData extends BaseRecord = BaseRecord,
+  TVariables = {},
+  TError extends HttpError = HttpError,
+> = {
+  inputProps: UseImportInputPropsType;
+  mutationResult:
+    | UseCreateReturnType<TData, TError, TVariables>
+    | UseCreateManyReturnType<TData, TError, TVariables>;
+  isLoading: boolean;
+  handleChange: HandleChangeType<TVariables, TData>;
+};
 
 /**
  * `useImport` hook allows you to handle your csv import logic easily.
  *
- * @see {@link https://refine.dev/docs/api-references/hooks/import-export/useImport} for more details.
+ * @see {@link https://refine.dev/docs/api-reference/core/hooks/import-export/useImport} for more details.
  *
  * @typeParam TItem - Interface of parsed csv data
- * @typeParam TData - Result data of the query extends {@link https://refine.dev/docs/api-references/interfaceReferences#baserecord `BaseRecord`}
- * @typeParam TError - Custom error object that extends {@link https://refine.dev/docs/api-references/interfaceReferences#httperror `HttpError`}
+ * @typeParam TData - Result data of the query extends {@link https://refine.dev/docs/api-reference/core/interfaceReferences#baserecord `BaseRecord`}
+ * @typeParam TError - Custom error object that extends {@link https://refine.dev/docs/api-reference/core/interfaceReferences/#httperror `HttpError`}
  * @typeParam TVariables - Values for mutation function
  *
  */
 export const useImport = <
-    TItem extends unknown = any,
-    TData extends BaseRecord = BaseRecord,
-    TError extends HttpError = HttpError,
-    TVariables = any,
+  TItem = any,
+  TData extends BaseRecord = BaseRecord,
+  TError extends HttpError = HttpError,
+  TVariables = any,
 >({
-    resourceName,
-    mapData = (item) => item as unknown as TVariables,
-    paparseOptions,
-    batchSize = Number.MAX_SAFE_INTEGER,
-    onFinish,
-    metaData,
-}: ImportOptions<TItem, TVariables, TData> = {}): {
-    uploadProps: UploadProps;
-    buttonProps: ButtonProps;
-    mutationResult:
-        | UseCreateReturnType<TData, TError, TVariables>
-        | UseCreateManyReturnType<TData, TError, TVariables>;
-} => {
-    const [processedAmount, setProcessedAmount] = useState<number>(0);
-    const [totalAmount, setTotalAmount] = useState<number>(0);
-    const [isLoading, setIsLoading] = useState(false);
+  resourceName,
+  resource: resourceFromProps,
+  mapData = (item) => item as unknown as TVariables,
+  paparseOptions,
+  batchSize = Number.MAX_SAFE_INTEGER,
+  onFinish,
+  meta,
+  metaData,
+  onProgress,
+  dataProviderName,
+}: ImportOptions<TItem, TVariables, TData> = {}): UseImportReturnType<
+  TData,
+  TVariables,
+  TError
+> => {
+  const [processedAmount, setProcessedAmount] = useState<number>(0);
+  const [totalAmount, setTotalAmount] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState(false);
 
-    const t = useTranslate();
-    const resourceWithRoute = useResourceWithRoute();
+  const { resource, identifier } = useResource(
+    resourceFromProps ?? resourceName,
+  );
 
-    const { useParams } = useRouterContext();
+  const getMeta = useMeta();
 
-    const { resource: routeResourceName } = useParams<ResourceRouterParams>();
-    const { name: resource } = resourceWithRoute(
-        resourceName ?? routeResourceName,
-    );
+  const createMany = useCreateMany<TData, TError, TVariables>();
+  const create = useCreate<TData, TError, TVariables>();
 
-    const createMany = useCreateMany<TData, TError, TVariables>();
-    const create = useCreate<TData, TError, TVariables>();
+  const combinedMeta = getMeta({
+    resource,
+    meta: pickNotDeprecated(meta, metaData),
+  });
 
-    let mutationResult:
-        | UseCreateReturnType<TData, TError, TVariables>
-        | UseCreateManyReturnType<TData, TError, TVariables>;
+  let mutationResult:
+    | UseCreateReturnType<TData, TError, TVariables>
+    | UseCreateManyReturnType<TData, TError, TVariables>;
 
-    if (batchSize === 1) {
-        mutationResult = create;
-    } else {
-        mutationResult = createMany;
-    }
+  if (batchSize === 1) {
+    mutationResult = create;
+  } else {
+    mutationResult = createMany;
+  }
 
-    const handleCleanup = () => {
-        setTotalAmount(0);
-        setProcessedAmount(0);
-        setIsLoading(false);
+  const handleCleanup = () => {
+    setTotalAmount(0);
+    setProcessedAmount(0);
+    setIsLoading(false);
+  };
 
-        setTimeout(() => {
-            notification.close(`${resource}-import`);
-        }, 4500);
+  const handleFinish = (
+    createdValues: CreatedValuesType<TVariables, TData>[],
+  ) => {
+    const result = {
+      succeeded: createdValues.filter(
+        (item) => item.type === "success",
+      ) as unknown as ImportSuccessResult<TVariables, TData>[],
+      errored: createdValues.filter(
+        (item) => item.type === "error",
+      ) as unknown as ImportErrorResult<TVariables>[],
     };
 
-    const handleFinish = (
-        createdValues: CreatedValuesType<TVariables, TData>[],
-    ) => {
-        const result = {
-            succeeded: createdValues.filter(
-                (item) => item.type === "success",
-            ) as unknown as ImportSuccessResult<TVariables, TData>[],
-            errored: createdValues.filter(
-                (item) => item.type === "error",
-            ) as unknown as ImportErrorResult<TVariables>[],
-        };
+    onFinish?.(result);
+    setIsLoading(false);
+  };
 
-        handleCleanup();
+  useEffect(() => {
+    onProgress?.({ totalAmount, processedAmount });
+  }, [totalAmount, processedAmount]);
 
-        onFinish?.(result);
-    };
+  const handleChange: HandleChangeType<TVariables, TData> = ({ file }) => {
+    handleCleanup();
+    return new Promise<CreatedValuesType<TVariables, TData>[]>((resolve) => {
+      setIsLoading(true);
+      papaparse.parse(file as any, {
+        complete: async ({ data }: { data: unknown[][] }) => {
+          const values = importCSVMapper(data, mapData);
 
-    useEffect(() => {
-        if (totalAmount > 0 && processedAmount > 0) {
-            const description = (
-                <div
-                    style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        marginTop: "-7px",
-                    }}
-                >
-                    <Progress
-                        type="circle"
-                        percent={Math.floor(
-                            (processedAmount / totalAmount) * 100,
-                        )}
-                        width={50}
-                        strokeColor="#1890ff"
-                        status="normal"
-                    />
-                    <span style={{ marginLeft: 8, width: "100%" }}>
-                        {t(
-                            "notifications.importProgress",
-                            {
-                                processed: processedAmount,
-                                total: totalAmount,
-                            },
-                            `Importing: ${processedAmount}/${totalAmount}`,
-                        )}
-                    </span>
-                </div>
-            );
+          setTotalAmount(values.length);
 
-            notification.open({
-                description,
-                message: null,
-                key: `${resource}-import`,
-                duration: 0,
-            });
-
-            if (processedAmount >= totalAmount) {
-            }
-        }
-    }, [totalAmount, processedAmount]);
-
-    const handleChange = ({
-        file,
-    }: UploadChangeParam): Promise<CreatedValuesType<TVariables, TData>[]> => {
-        return new Promise<CreatedValuesType<TVariables, TData>[]>(
-            (resolve) => {
-                setIsLoading(true);
-                parse(file as any, {
-                    complete: async ({ data }: { data: unknown[][] }) => {
-                        const values = importCSVMapper(data, mapData);
-
-                        setTotalAmount(values.length);
-
-                        if (batchSize === 1) {
-                            const createdValues = await Promise.all(
-                                values
-                                    .map((value) => {
-                                        const response = create.mutateAsync({
-                                            resource,
-                                            values: value,
-                                            successNotification: false,
-                                            errorNotification: false,
-                                            metaData,
-                                        });
-
-                                        return { response, value };
-                                    })
-                                    .map(({ response, value }) =>
-                                        response
-                                            .then(({ data }) => {
-                                                setProcessedAmount(
-                                                    (currentAmount) =>
-                                                        currentAmount + 1,
-                                                );
-
-                                                return {
-                                                    response: [data],
-                                                    type: "success",
-                                                    request: [value],
-                                                } as ImportSuccessResult<
-                                                    TVariables,
-                                                    TData
-                                                >;
-                                            })
-                                            .catch(
-                                                (error: HttpError) =>
-                                                    ({
-                                                        response: [error],
-                                                        type: "error",
-                                                        request: [value],
-                                                    } as ImportErrorResult<TVariables>),
-                                            ),
-                                    ),
-                            );
-
-                            resolve(createdValues);
-                            handleFinish(createdValues);
-                        } else {
-                            const createdValues = await Promise.all(
-                                chunk(values, batchSize)
-                                    .map((batch) => {
-                                        return {
-                                            response: createMany.mutateAsync({
-                                                resource,
-                                                values: batch,
-                                                successNotification: false,
-                                                errorNotification: false,
-                                                metaData,
-                                            }),
-                                            currentBatchLength: batch.length,
-                                            value: batch,
-                                        };
-                                    })
-                                    .map(
-                                        ({
-                                            response,
-                                            value,
-                                            currentBatchLength,
-                                        }) =>
-                                            response
-                                                .then((response) => {
-                                                    setProcessedAmount(
-                                                        (currentAmount) =>
-                                                            currentAmount +
-                                                            currentBatchLength,
-                                                    );
-
-                                                    return {
-                                                        response: response.data,
-                                                        type: "success",
-                                                        request: value,
-                                                    } as ImportSuccessResult<
-                                                        TVariables,
-                                                        TData
-                                                    >;
-                                                })
-                                                .catch(
-                                                    (error: HttpError) =>
-                                                        ({
-                                                            response: [error],
-                                                            type: "error",
-                                                            request: value,
-                                                        } as ImportErrorResult<TVariables>),
-                                                ),
-                                    ),
-                            );
-
-                            resolve(createdValues);
-                            handleFinish(createdValues);
-                        }
-                    },
-
-                    ...paparseOptions,
+          if (batchSize === 1) {
+            // Create Processor Functions
+            const valueFns = values.map((value) => {
+              const fn = async () => {
+                const response = await create.mutateAsync({
+                  resource: identifier ?? "",
+                  values: value,
+                  successNotification: false,
+                  errorNotification: false,
+                  dataProviderName,
+                  meta: combinedMeta,
+                  metaData: combinedMeta,
                 });
-            },
-        ).then((createdValues) => {
-            handleFinish(createdValues);
-            return createdValues;
-        });
-    };
 
-    return {
-        uploadProps: {
-            onChange: handleChange,
-            beforeUpload: () => false,
-            showUploadList: false,
-            accept: ".csv",
+                return { response, value };
+              };
+              return fn;
+            });
+            // Sequentially run processor functions and process resolves/rejects
+            const createdValues = await sequentialPromises(
+              valueFns,
+              ({ response, value }) => {
+                setProcessedAmount((currentAmount) => {
+                  return currentAmount + 1;
+                });
+
+                return {
+                  response: [response.data],
+                  type: "success",
+                  request: [value],
+                } as ImportSuccessResult<TVariables, TData>;
+              },
+              (error: HttpError, index) => {
+                return {
+                  response: [error],
+                  type: "error",
+                  request: [values[index]],
+                } as ImportErrorResult<TVariables>;
+              },
+            );
+            // Resolve with created values
+            resolve(createdValues);
+          } else {
+            // Create Chunks
+            const chunks = chunk(values, batchSize);
+            // Create Chunk Processor Functions
+            const chunkedFns = chunks.map((chunkedValues) => {
+              const fn = async () => {
+                const response = await createMany.mutateAsync({
+                  resource: identifier ?? "",
+                  values: chunkedValues,
+                  successNotification: false,
+                  errorNotification: false,
+                  dataProviderName,
+                  meta: combinedMeta,
+                  metaData: combinedMeta,
+                });
+
+                return {
+                  response,
+                  value: chunkedValues,
+                  currentBatchLength: chunkedValues.length,
+                };
+              };
+
+              return fn;
+            });
+            // Sequentially run chunked functions and process resolves/rejects
+            const createdValues = await sequentialPromises(
+              chunkedFns,
+              ({ response, currentBatchLength, value }) => {
+                setProcessedAmount((currentAmount) => {
+                  return currentAmount + currentBatchLength;
+                });
+
+                return {
+                  response: response.data,
+                  type: "success",
+                  request: value,
+                } as ImportSuccessResult<TVariables, TData>;
+              },
+              (error: HttpError, index) => {
+                return {
+                  response: [error],
+                  type: "error",
+                  request: chunks[index],
+                } as ImportErrorResult<TVariables>;
+              },
+            );
+            // resolve with all created values
+            resolve(createdValues);
+          }
         },
-        buttonProps: {
-            type: "default",
-            loading: isLoading,
-        },
-        mutationResult,
-    };
+
+        ...paparseOptions,
+      });
+    }).then((createdValues) => {
+      handleFinish(createdValues);
+      return createdValues;
+    });
+  };
+
+  return {
+    inputProps: {
+      type: "file",
+      accept: ".csv",
+      onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files && event.target.files.length > 0) {
+          handleChange({ file: event.target.files[0] });
+        }
+      },
+    },
+    mutationResult,
+    isLoading,
+    handleChange,
+  };
 };

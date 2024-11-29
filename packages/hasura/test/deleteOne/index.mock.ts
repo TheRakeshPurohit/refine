@@ -1,73 +1,450 @@
 import nock from "nock";
 
 nock("https://flowing-mammal-24.hasura.app:443", { encodedQueryParams: true })
-    .post("/v1/graphql", {
-        query: "mutation ($id: uuid!) {\n  delete_posts_by_pk (id: $id) {\n    id, title\n  }\n}",
-        variables: { id: "52218781-f240-48d3-8407-fca1d163d3ce" },
-    })
-    .reply(
-        200,
-        [
-            "1f8b080000000000040315ca4b0ac3201000d0ab845977207eda486e50c81dc438932215953a5d94e0dddb6e1fef040a12603d8138b3b06fb54bf7fbc7b7e75f13c10a57ad955b9cc243db19ad2383cece0b1e312852374326325c409264fef57b91501e69cf3cd5c6057b7dbf224f5b8a5c3a138c31beec58762277000000",
-        ],
-        [
-            "Date",
-            "Tue, 19 Oct 2021 07:41:08 GMT",
-            "Content-Type",
-            "application/json; charset=utf-8",
-            "Transfer-Encoding",
-            "chunked",
-            "Connection",
-            "close",
-            "x-request-id",
-            "fbb3478e27c22d0723c2aa3f2428ce6b",
-            "Content-Encoding",
-            "gzip",
-            "Strict-Transport-Security",
-            "max-age=31536000; includeSubDomains",
-            "CF-Cache-Status",
-            "DYNAMIC",
-            "Expect-CT",
-            'max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"',
-            "Server",
-            "cloudflare",
-            "CF-RAY",
-            "6a085cb03d565488-IST",
-        ],
-    );
+  .post("/v1/graphql", {
+    query:
+      "mutation ($id: uuid!) {\n      delete_posts_by_pk (id: $id) {\n    id, title\n  }\n    }",
+    variables: { id: "25c94041-84c8-4e8f-9fb4-ea5453bf53e6" },
+  })
+  .reply(
+    200,
+    {
+      data: {
+        delete_posts_by_pk: {
+          id: "25c94041-84c8-4e8f-9fb4-ea5453bf53e6",
+          title: "Aenean ultricies non libero sit amet pellentesque",
+        },
+      },
+    },
+    [
+      "Date",
+      "Wed, 10 Jan 2024 19:32:15 GMT",
+      "Content-Type",
+      "application/json; charset=utf-8",
+      "Content-Length",
+      "137",
+      "Connection",
+      "close",
+      "x-request-id",
+      "de336ce3d4a972b2568e0903e9eb5858",
+      "CF-Cache-Status",
+      "DYNAMIC",
+      "Content-Security-Policy",
+      "upgrade-insecure-requests",
+      "Referrer-Policy",
+      "strict-origin-when-cross-origin",
+      "Strict-Transport-Security",
+      "max-age=31536000; includeSubDomains",
+      "X-Content-Type-Options",
+      "nosniff",
+      "X-Frame-Options",
+      "SAMEORIGIN",
+      "X-XSS-Protection",
+      "0",
+      "Server",
+      "cloudflare",
+      "CF-RAY",
+      "84375843de10733c-BUD",
+    ],
+  );
 
 nock("https://flowing-mammal-24.hasura.app:443", { encodedQueryParams: true })
-    .post("/v1/graphql", {
-        query: "mutation ($id: uuid!) {\n  delete_posts_by_pk (id: $id) {\n    id\n  }\n}",
-        variables: { id: "b65b724e-7f21-47ad-aa37-194c4dbcf7cd" },
-    })
-    .reply(
-        200,
-        [
-            "1f8b080000000000040315c8c10a80200c00d07fd97d876c35f267647313a220412f21fe7bf48e6f8049178803cc6fef9eead37a4bfaa67afd7b1a44d07d530ee4c8252c482c86222be3725026d35c381bcc393f759077864d000000",
-        ],
-        [
-            "Date",
-            "Tue, 19 Oct 2021 07:47:30 GMT",
-            "Content-Type",
-            "application/json; charset=utf-8",
-            "Transfer-Encoding",
-            "chunked",
-            "Connection",
-            "close",
-            "x-request-id",
-            "6d4af690403b2fdbe4ce743813feedff",
-            "Content-Encoding",
-            "gzip",
-            "Strict-Transport-Security",
-            "max-age=31536000; includeSubDomains",
-            "CF-Cache-Status",
-            "DYNAMIC",
-            "Expect-CT",
-            'max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"',
-            "Server",
-            "cloudflare",
-            "CF-RAY",
-            "6a0866075eb0548e-IST",
-        ],
-    );
+  .post("/v1/graphql", {
+    query:
+      "mutation ($id: Int!) {\n      delete_users_by_pk (id: $id) {\n    id, name\n  }\n    }",
+    variables: { id: 1 },
+  })
+  .reply(200, { data: { delete_users_by_pk: { id: 1, name: "test" } } }, [
+    "Date",
+    "Wed, 10 Jan 2024 19:32:16 GMT",
+    "Content-Type",
+    "application/json; charset=utf-8",
+    "Content-Length",
+    "36",
+    "Connection",
+    "close",
+    "x-request-id",
+    "07bf6e1d22a9efa718942de7d959b1ef",
+    "CF-Cache-Status",
+    "DYNAMIC",
+    "Content-Security-Policy",
+    "upgrade-insecure-requests",
+    "Referrer-Policy",
+    "strict-origin-when-cross-origin",
+    "Strict-Transport-Security",
+    "max-age=31536000; includeSubDomains",
+    "X-Content-Type-Options",
+    "nosniff",
+    "X-Frame-Options",
+    "SAMEORIGIN",
+    "X-XSS-Protection",
+    "0",
+    "Server",
+    "cloudflare",
+    "CF-RAY",
+    "8437584cfe24733b-BUD",
+  ]);
+
+nock("https://flowing-mammal-24.hasura.app:443", { encodedQueryParams: true })
+  .post("/v1/graphql", {
+    query:
+      "mutation ($id: uuid!) {\n      delete_posts_by_pk (id: $id) {\n    id\n  }\n    }",
+    variables: { id: "8bdbb0f5-f99b-4c80-808a-3ef64d52559b" },
+  })
+  .reply(
+    200,
+    {
+      data: {
+        delete_posts_by_pk: {
+          id: "8bdbb0f5-f99b-4c80-808a-3ef64d52559b",
+        },
+      },
+    },
+    [
+      "Date",
+      "Wed, 10 Jan 2024 19:32:17 GMT",
+      "Content-Type",
+      "application/json; charset=utf-8",
+      "Content-Length",
+      "77",
+      "Connection",
+      "close",
+      "x-request-id",
+      "dd8864ccb3a9b64c078aff0de3464546",
+      "CF-Cache-Status",
+      "DYNAMIC",
+      "Content-Security-Policy",
+      "upgrade-insecure-requests",
+      "Referrer-Policy",
+      "strict-origin-when-cross-origin",
+      "Strict-Transport-Security",
+      "max-age=31536000; includeSubDomains",
+      "X-Content-Type-Options",
+      "nosniff",
+      "X-Frame-Options",
+      "SAMEORIGIN",
+      "X-XSS-Protection",
+      "0",
+      "Server",
+      "cloudflare",
+      "CF-RAY",
+      "84375855c81868b0-BUD",
+    ],
+  );
+
+nock("https://ruling-redbird-23.hasura.app:443", { encodedQueryParams: true })
+  .post("/v1/graphql", {
+    query:
+      "mutation ($id: uuid!) {\n      deletePostsByPk (id: $id) {\n    id, title\n  }\n    }",
+    variables: { id: "acab1eff-1b2d-4abb-9f0d-c2490f576850" },
+  })
+  .reply(
+    200,
+    {
+      data: {
+        deletePostsByPk: {
+          id: "acab1eff-1b2d-4abb-9f0d-c2490f576850",
+          title: "Aenean ultricies non libero sit amet pellentesque",
+        },
+      },
+    },
+    [
+      "Date",
+      "Wed, 10 Jan 2024 19:32:19 GMT",
+      "Content-Type",
+      "application/json; charset=utf-8",
+      "Content-Length",
+      "134",
+      "Connection",
+      "close",
+      "x-request-id",
+      "dd5bdcc323bde48dc7869ef985b6776e",
+      "CF-Cache-Status",
+      "DYNAMIC",
+      "Content-Security-Policy",
+      "upgrade-insecure-requests",
+      "Referrer-Policy",
+      "strict-origin-when-cross-origin",
+      "Strict-Transport-Security",
+      "max-age=31536000; includeSubDomains",
+      "X-Content-Type-Options",
+      "nosniff",
+      "X-Frame-Options",
+      "SAMEORIGIN",
+      "X-XSS-Protection",
+      "0",
+      "Server",
+      "cloudflare",
+      "CF-RAY",
+      "8437585ad9951cfa-BUD",
+    ],
+  );
+
+nock("https://ruling-redbird-23.hasura.app:443", { encodedQueryParams: true })
+  .post("/v1/graphql", {
+    query:
+      "mutation ($id: Int!) {\n      deleteUsersByPk (id: $id) {\n    id, name\n  }\n    }",
+    variables: { id: 1 },
+  })
+  .reply(200, { data: { deleteUsersByPk: { id: 1, name: "test" } } }, [
+    "Date",
+    "Wed, 10 Jan 2024 19:32:20 GMT",
+    "Content-Type",
+    "application/json; charset=utf-8",
+    "Content-Length",
+    "33",
+    "Connection",
+    "close",
+    "x-request-id",
+    "252666f9f7b8a4f8aeb2dc1aaedb3ee1",
+    "CF-Cache-Status",
+    "DYNAMIC",
+    "Content-Security-Policy",
+    "upgrade-insecure-requests",
+    "Referrer-Policy",
+    "strict-origin-when-cross-origin",
+    "Strict-Transport-Security",
+    "max-age=31536000; includeSubDomains",
+    "X-Content-Type-Options",
+    "nosniff",
+    "X-Frame-Options",
+    "SAMEORIGIN",
+    "X-XSS-Protection",
+    "0",
+    "Server",
+    "cloudflare",
+    "CF-RAY",
+    "8437586469f41cfa-BUD",
+  ]);
+
+nock("https://ruling-redbird-23.hasura.app:443", { encodedQueryParams: true })
+  .post("/v1/graphql", {
+    query:
+      "mutation ($id: uuid!) {\n      deletePostsByPk (id: $id) {\n    id\n  }\n    }",
+    variables: { id: "f1dc4055c-f31e-42df-b72d-c7a3a2936e51" },
+  })
+  .reply(
+    200,
+    {
+      data: {
+        deletePostsByPk: {
+          id: "f1dc4055c-f31e-42df-b72d-c7a3a2936e51",
+        },
+      },
+    },
+    [
+      "Date",
+      "Wed, 10 Jan 2024 19:32:21 GMT",
+      "Content-Type",
+      "application/json; charset=utf-8",
+      "Content-Length",
+      "154",
+      "Connection",
+      "close",
+      "CF-Cache-Status",
+      "DYNAMIC",
+      "Content-Security-Policy",
+      "upgrade-insecure-requests",
+      "Referrer-Policy",
+      "strict-origin-when-cross-origin",
+      "Strict-Transport-Security",
+      "max-age=31536000; includeSubDomains",
+      "X-Content-Type-Options",
+      "nosniff",
+      "X-Frame-Options",
+      "SAMEORIGIN",
+      "X-XSS-Protection",
+      "0",
+      "Server",
+      "cloudflare",
+      "CF-RAY",
+      "8437586e1a52c1c1-BUD",
+    ],
+  );
+
+nock("https://flowing-mammal-24.hasura.app:443", { encodedQueryParams: true })
+  .post("/v1/graphql", {
+    query:
+      "mutation DeletePost($id: uuid!) {\n  delete_posts_by_pk(id: $id) {\n    id\n    title\n  }\n}\n",
+    variables: { id: "5a7e0232-c581-4fbb-81ff-bf768c74d662" },
+    operationName: "DeletePost",
+  })
+  .reply(
+    200,
+    {
+      data: {
+        delete_posts_by_pk: {
+          id: "5a7e0232-c581-4fbb-81ff-bf768c74d662",
+          title: "Aenean ultricies non libero sit amet pellentesque",
+        },
+      },
+    },
+    [
+      "Date",
+      "Wed, 10 Jan 2024 19:32:22 GMT",
+      "Content-Type",
+      "application/json; charset=utf-8",
+      "Content-Length",
+      "137",
+      "Connection",
+      "close",
+      "x-request-id",
+      "6a34fe9e8dbf0bd1f60f43bd83bdca63",
+      "CF-Cache-Status",
+      "DYNAMIC",
+      "Content-Security-Policy",
+      "upgrade-insecure-requests",
+      "Referrer-Policy",
+      "strict-origin-when-cross-origin",
+      "Strict-Transport-Security",
+      "max-age=31536000; includeSubDomains",
+      "X-Content-Type-Options",
+      "nosniff",
+      "X-Frame-Options",
+      "SAMEORIGIN",
+      "X-XSS-Protection",
+      "0",
+      "Server",
+      "cloudflare",
+      "CF-RAY",
+      "84375873580e1cea-BUD",
+    ],
+  );
+
+nock("https://ruling-redbird-23.hasura.app:443", { encodedQueryParams: true })
+  .post("/v1/graphql", {
+    query:
+      "mutation DeletePost($id: uuid!) {\n  deletePostsByPk(id: $id) {\n    id\n    title\n  }\n}\n",
+    variables: { id: "2efdc1fe-658d-4379-bbfd-76f013d1df98" },
+    operationName: "DeletePost",
+  })
+  .reply(
+    200,
+    {
+      data: {
+        deletePostsByPk: {
+          id: "2efdc1fe-658d-4379-bbfd-76f013d1df98",
+        },
+      },
+    },
+    [
+      "Date",
+      "Wed, 10 Jan 2024 19:32:22 GMT",
+      "Content-Type",
+      "application/json; charset=utf-8",
+      "Content-Length",
+      "165",
+      "Connection",
+      "close",
+      "CF-Cache-Status",
+      "DYNAMIC",
+      "Content-Security-Policy",
+      "upgrade-insecure-requests",
+      "Referrer-Policy",
+      "strict-origin-when-cross-origin",
+      "Strict-Transport-Security",
+      "max-age=31536000; includeSubDomains",
+      "X-Content-Type-Options",
+      "nosniff",
+      "X-Frame-Options",
+      "SAMEORIGIN",
+      "X-XSS-Protection",
+      "0",
+      "Server",
+      "cloudflare",
+      "CF-RAY",
+      "843758777a981cd0-BUD",
+    ],
+  );
+
+nock("https://flowing-mammal-24.hasura.app:443", { encodedQueryParams: true })
+  .post("/v1/graphql", {
+    query:
+      "mutation ($id: uuid!) {\n      delete_posts_by_pk (id: $id) {\n    id\n  }\n    }",
+    variables: { id: "39ddbca5-cd14-49fc-b88a-1925d808d310" },
+  })
+  .reply(
+    200,
+    {
+      data: {
+        delete_posts_by_pk: {
+          id: "39ddbca5-cd14-49fc-b88a-1925d808d310",
+        },
+      },
+    },
+    [
+      "Date",
+      "Wed, 10 Jan 2024 19:32:23 GMT",
+      "Content-Type",
+      "application/json; charset=utf-8",
+      "Content-Length",
+      "77",
+      "Connection",
+      "close",
+      "x-request-id",
+      "28c9cac50f6279466efbe3ab4ab4cbd2",
+      "CF-Cache-Status",
+      "DYNAMIC",
+      "Content-Security-Policy",
+      "upgrade-insecure-requests",
+      "Referrer-Policy",
+      "strict-origin-when-cross-origin",
+      "Strict-Transport-Security",
+      "max-age=31536000; includeSubDomains",
+      "X-Content-Type-Options",
+      "nosniff",
+      "X-Frame-Options",
+      "SAMEORIGIN",
+      "X-XSS-Protection",
+      "0",
+      "Server",
+      "cloudflare",
+      "CF-RAY",
+      "843758791c8e733d-BUD",
+    ],
+  );
+
+nock("https://ruling-redbird-23.hasura.app:443", { encodedQueryParams: true })
+  .post("/v1/graphql", {
+    query:
+      "mutation ($id: uuid!) {\n      deletePostsByPk (id: $id) {\n    id\n  }\n    }",
+    variables: { id: "1e1dc4c8-c9fa-46b7-924e-0995c33fdb10" },
+  })
+  .reply(
+    200,
+    {
+      data: {
+        deletePostsByPk: { id: "1e1dc4c8-c9fa-46b7-924e-0995c33fdb10" },
+      },
+    },
+    [
+      "Date",
+      "Wed, 10 Jan 2024 19:32:23 GMT",
+      "Content-Type",
+      "application/json; charset=utf-8",
+      "Content-Length",
+      "74",
+      "Connection",
+      "close",
+      "x-request-id",
+      "6d106f1d013145fe750b324edc57ea0c",
+      "CF-Cache-Status",
+      "DYNAMIC",
+      "Content-Security-Policy",
+      "upgrade-insecure-requests",
+      "Referrer-Policy",
+      "strict-origin-when-cross-origin",
+      "Strict-Transport-Security",
+      "max-age=31536000; includeSubDomains",
+      "X-Content-Type-Options",
+      "nosniff",
+      "X-Frame-Options",
+      "SAMEORIGIN",
+      "X-XSS-Protection",
+      "0",
+      "Server",
+      "cloudflare",
+      "CF-RAY",
+      "8437587e1f6a733a-BUD",
+    ],
+  );

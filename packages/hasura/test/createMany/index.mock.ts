@@ -1,103 +1,445 @@
 import nock from "nock";
 
 nock("https://flowing-mammal-24.hasura.app:443", { encodedQueryParams: true })
-    .post("/v1/graphql", {
-        query: "mutation ($objects: [posts_insert_input!]!) {\n  insert_posts (objects: $objects) {\n    returning { id, title, content, status, category { id } }\n  }\n}",
-        variables: {
-            objects: [
-                {
-                    content: "Vestibulum vulputate sapien arcu.",
-                    title: "Aenean ultricies non libero sit amet pellentesque",
-                    status: "draft",
-                    category_id: "317cea5e-fef3-4858-8043-4496e5c7f5ab",
-                },
-                {
-                    content: "Aliquam nibh erat.",
-                    title: "Etiam tincidunt ex ut auctor faucibus",
-                    status: "draft",
-                    category_id: "317cea5e-fef3-4858-8043-4496e5c7f5ab",
-                },
-            ],
+  .post("/v1/graphql", {
+    query:
+      "mutation CreateManyPosts($objects: [posts_insert_input!]!) {\n  insert_posts(objects: $objects) {\n    returning {\n      id\n      id\n      title\n      content\n      category {\n        id\n      }\n    }\n  }\n}\n",
+    variables: {
+      objects: [
+        {
+          content: "Vestibulum vulputate sapien arcu.",
+          title: "Aenean ultricies non libero sit amet pellentesque",
+          category_id: "e27156c3-9998-434f-bd5b-2b078283ff26",
         },
-    })
-    .reply(
-        200,
-        [
-            "1f8b0800000000000403ad8fc14ec33010447f65e533464d9d38496f3df00b5c10426b7b5d2cb94e6aaf11a8cabfe35670e0ce69677767a47957e190511cae22a44299dfd6a570b9ed99b8e614d249c0015edadf898350ae331da99d44a795ec7756c9c99396a39995433793c5413c080e1ca9d98f940813d4c839d84005d29220064379811218f04c0c2bc54889a95c2ab5ac5d9a4edcd2cf5438981aeb193e6a5c2b2313145c0325c06ceb63739776acadaf70193ddfe2cd745af2d71de95eb91b2de140d2936f95a76192d3ae6faa9f350d76f4031ab16d0ff08338755ed969de4b3d9391bd4627d10cbdd4da4c831a3bb5f7b79abf884f1cf00c1c920dae2606fa84dac0aae525836fb311943f58c7182eb5655230ef4019f95f395eb76dfb064aa383e5d5010000",
-        ],
-        [
-            "Date",
-            "Mon, 18 Oct 2021 13:37:34 GMT",
-            "Content-Type",
-            "application/json; charset=utf-8",
-            "Transfer-Encoding",
-            "chunked",
-            "Connection",
-            "close",
-            "x-request-id",
-            "792054bf9c36fd2f2f9c822d2a6f0962",
-            "Content-Encoding",
-            "gzip",
-            "Strict-Transport-Security",
-            "max-age=31536000; includeSubDomains",
-            "CF-Cache-Status",
-            "DYNAMIC",
-            "Expect-CT",
-            'max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"',
-            "Server",
-            "cloudflare",
-            "CF-RAY",
-            "6a0229720ce75488-IST",
-        ],
-    );
+        {
+          content: "Aliquam nibh erat.",
+          title: "Etiam tincidunt ex ut auctor faucibus",
+          category_id: "e27156c3-9998-434f-bd5b-2b078283ff26",
+        },
+      ],
+    },
+    operationName: "CreateManyPosts",
+  })
+  .reply(
+    200,
+    {
+      data: {
+        insert_posts: {
+          returning: [
+            {
+              id: "572708c7-840d-430a-befd-1416bdee799a",
+              title: "Aenean ultricies non libero sit amet pellentesque",
+              content: "Vestibulum vulputate sapien arcu.",
+              category: {
+                id: "e27156c3-9998-434f-bd5b-2b078283ff26",
+              },
+            },
+            {
+              id: "478212ed-9a78-428c-b418-306bd88e0790",
+              title: "Etiam tincidunt ex ut auctor faucibus",
+              content: "Aliquam nibh erat.",
+              category: {
+                id: "e27156c3-9998-434f-bd5b-2b078283ff26",
+              },
+            },
+          ],
+        },
+      },
+    },
+    [
+      "Date",
+      "Wed, 10 Jan 2024 19:45:28 GMT",
+      "Content-Type",
+      "application/json; charset=utf-8",
+      "Content-Length",
+      "435",
+      "Connection",
+      "close",
+      "x-request-id",
+      "cf0905220dab318f2d375a2fee718c1c",
+      "CF-Cache-Status",
+      "DYNAMIC",
+      "Content-Security-Policy",
+      "upgrade-insecure-requests",
+      "Referrer-Policy",
+      "strict-origin-when-cross-origin",
+      "Strict-Transport-Security",
+      "max-age=31536000; includeSubDomains",
+      "X-Content-Type-Options",
+      "nosniff",
+      "X-Frame-Options",
+      "SAMEORIGIN",
+      "X-XSS-Protection",
+      "0",
+      "Server",
+      "cloudflare",
+      "CF-RAY",
+      "84376ba04a961cbc-BUD",
+    ],
+  );
 
 nock("https://flowing-mammal-24.hasura.app:443", { encodedQueryParams: true })
-    .post("/v1/graphql", {
-        query: "mutation ($objects: [posts_insert_input!]!) {\n  insert_posts (objects: $objects) {\n    returning { id }\n  }\n}",
-        variables: {
-            objects: [
-                {
-                    content: "Vestibulum vulputate sapien arcu.",
-                    title: "Aenean ultricies non libero sit amet pellentesque",
-                    status: "draft",
-                    category_id: "317cea5e-fef3-4858-8043-4496e5c7f5ab",
-                },
-                {
-                    content: "Aliquam nibh erat.",
-                    title: "Etiam tincidunt ex ut auctor faucibus",
-                    status: "draft",
-                    category_id: "317cea5e-fef3-4858-8043-4496e5c7f5ab",
-                },
-            ],
+  .post("/v1/graphql", {
+    query:
+      "mutation CreateManyPosts($objects: [posts_insert_input!]!) {\n  insert_posts(objects: $objects) {\n    returning {\n      id\n      id\n      title\n    }\n  }\n}\n",
+    variables: {
+      objects: [
+        {
+          content: "Vestibulum vulputate sapien arcu.",
+          title: "Aenean ultricies non libero sit amet pellentesque",
+          category_id: "e27156c3-9998-434f-bd5b-2b078283ff26",
         },
-    })
-    .reply(
-        200,
-        [
-            "1f8b080000000000040335ca410e02210c40d1ab90ae6dc2402185ab186380a2990d1ac0d584bb3b2e5cbefc7f80a499201eb0b751fbbcbf5f638e9f7b9d9fdef6f60415d5f5ec0211980c27f1090d0583548a412611d4a18adecac3b3635817f5df6db13ab14357b34722da3057ed514e661bd8b01358b7b5d617fdbb0d1688000000",
-        ],
-        [
-            "Date",
-            "Tue, 19 Oct 2021 06:51:58 GMT",
-            "Content-Type",
-            "application/json; charset=utf-8",
-            "Transfer-Encoding",
-            "chunked",
-            "Connection",
-            "close",
-            "x-request-id",
-            "f8f2fdd27b989b4960ea559b99842e69",
-            "Content-Encoding",
-            "gzip",
-            "Strict-Transport-Security",
-            "max-age=31536000; includeSubDomains",
-            "CF-Cache-Status",
-            "DYNAMIC",
-            "Expect-CT",
-            'max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"',
-            "Server",
-            "cloudflare",
-            "CF-RAY",
-            "6a0814b35fa35493-IST",
-        ],
-    );
+        {
+          content: "Aliquam nibh erat.",
+          title: "Etiam tincidunt ex ut auctor faucibus",
+          category_id: "e27156c3-9998-434f-bd5b-2b078283ff26",
+        },
+      ],
+    },
+    operationName: "CreateManyPosts",
+  })
+  .reply(
+    200,
+    {
+      data: {
+        insert_posts: {
+          returning: [
+            {
+              id: "2a0d531e-ad15-440f-bf0b-7d23e7e21131",
+              title: "Aenean ultricies non libero sit amet pellentesque",
+            },
+            {
+              id: "d5448401-4860-48d4-96ab-0cea03fb9864",
+              title: "Etiam tincidunt ex ut auctor faucibus",
+            },
+          ],
+        },
+      },
+    },
+    [
+      "Date",
+      "Wed, 10 Jan 2024 19:45:29 GMT",
+      "Content-Type",
+      "application/json; charset=utf-8",
+      "Content-Length",
+      "244",
+      "Connection",
+      "close",
+      "x-request-id",
+      "d058e1cd290a9de40574d7dc0cf8a366",
+      "CF-Cache-Status",
+      "DYNAMIC",
+      "Content-Security-Policy",
+      "upgrade-insecure-requests",
+      "Referrer-Policy",
+      "strict-origin-when-cross-origin",
+      "Strict-Transport-Security",
+      "max-age=31536000; includeSubDomains",
+      "X-Content-Type-Options",
+      "nosniff",
+      "X-Frame-Options",
+      "SAMEORIGIN",
+      "X-XSS-Protection",
+      "0",
+      "Server",
+      "cloudflare",
+      "CF-RAY",
+      "84376ba9bf0ac1be-BUD",
+    ],
+  );
+
+nock("https://ruling-redbird-23.hasura.app:443", { encodedQueryParams: true })
+  .post("/v1/graphql", {
+    query:
+      "mutation CreateManyPosts($objects: [PostsInsertInput!]!) {\n  insertPosts(objects: $objects) {\n    returning {\n      id\n      id\n      title\n      content\n      category {\n        id\n      }\n    }\n  }\n}\n",
+    variables: {
+      objects: [
+        {
+          content: "Vestibulum vulputate sapien arcu.",
+          title: "Aenean ultricies non libero sit amet pellentesque",
+          categoryId: "e27156c3-9998-434f-bd5b-2b078283ff26",
+        },
+        {
+          content: "Aliquam nibh erat.",
+          title: "Etiam tincidunt ex ut auctor faucibus",
+          categoryId: "e27156c3-9998-434f-bd5b-2b078283ff26",
+        },
+      ],
+    },
+    operationName: "CreateManyPosts",
+  })
+  .reply(
+    200,
+    {
+      data: {
+        insertPosts: {
+          returning: [
+            {
+              id: "4ec22cb3-b679-4891-a489-3d19cf275ab3",
+              title: "Aenean ultricies non libero sit amet pellentesque",
+              content: "Vestibulum vulputate sapien arcu.",
+              category: {
+                id: "e27156c3-9998-434f-bd5b-2b078283ff26",
+              },
+            },
+            {
+              id: "ae316d48-025a-47db-b4c0-ff4694f52c85",
+              title: "Etiam tincidunt ex ut auctor faucibus",
+              content: "Aliquam nibh erat.",
+              category: {
+                id: "e27156c3-9998-434f-bd5b-2b078283ff26",
+              },
+            },
+          ],
+        },
+      },
+    },
+    [
+      "Date",
+      "Wed, 10 Jan 2024 19:45:31 GMT",
+      "Content-Type",
+      "application/json; charset=utf-8",
+      "Content-Length",
+      "434",
+      "Connection",
+      "close",
+      "x-request-id",
+      "be077ae83240bb68d6e9516d2a7b1cbc",
+      "CF-Cache-Status",
+      "DYNAMIC",
+      "Content-Security-Policy",
+      "upgrade-insecure-requests",
+      "Referrer-Policy",
+      "strict-origin-when-cross-origin",
+      "Strict-Transport-Security",
+      "max-age=31536000; includeSubDomains",
+      "X-Content-Type-Options",
+      "nosniff",
+      "X-Frame-Options",
+      "SAMEORIGIN",
+      "X-XSS-Protection",
+      "0",
+      "Server",
+      "cloudflare",
+      "CF-RAY",
+      "84376bb2ed2768bc-BUD",
+    ],
+  );
+
+nock("https://ruling-redbird-23.hasura.app:443", { encodedQueryParams: true })
+  .post("/v1/graphql", {
+    query:
+      "mutation CreateManyPosts($objects: [PostsInsertInput!]!) {\n  insertPosts(objects: $objects) {\n    returning {\n      id\n      id\n      title\n    }\n  }\n}\n",
+    variables: {
+      objects: [
+        {
+          content: "Vestibulum vulputate sapien arcu.",
+          title: "Aenean ultricies non libero sit amet pellentesque",
+          categoryId: "e27156c3-9998-434f-bd5b-2b078283ff26",
+        },
+        {
+          content: "Aliquam nibh erat.",
+          title: "Etiam tincidunt ex ut auctor faucibus",
+          categoryId: "e27156c3-9998-434f-bd5b-2b078283ff26",
+        },
+      ],
+    },
+    operationName: "CreateManyPosts",
+  })
+  .reply(
+    200,
+    {
+      data: {
+        insertPosts: {
+          returning: [
+            {
+              id: "863c2abb-e368-4ae0-8c0c-a1d7d1ec4630",
+              title: "Aenean ultricies non libero sit amet pellentesque",
+            },
+            {
+              id: "d0fc6e73-8372-449f-bb3b-e633ea7e2817",
+              title: "Etiam tincidunt ex ut auctor faucibus",
+            },
+          ],
+        },
+      },
+    },
+    [
+      "Date",
+      "Wed, 10 Jan 2024 19:45:33 GMT",
+      "Content-Type",
+      "application/json; charset=utf-8",
+      "Content-Length",
+      "243",
+      "Connection",
+      "close",
+      "x-request-id",
+      "449b6444766cf6755815512938c1f84b",
+      "CF-Cache-Status",
+      "DYNAMIC",
+      "Content-Security-Policy",
+      "upgrade-insecure-requests",
+      "Referrer-Policy",
+      "strict-origin-when-cross-origin",
+      "Strict-Transport-Security",
+      "max-age=31536000; includeSubDomains",
+      "X-Content-Type-Options",
+      "nosniff",
+      "X-Frame-Options",
+      "SAMEORIGIN",
+      "X-XSS-Protection",
+      "0",
+      "Server",
+      "cloudflare",
+      "CF-RAY",
+      "84376bbd7c8d7339-BUD",
+    ],
+  );
+
+nock("https://flowing-mammal-24.hasura.app:443", { encodedQueryParams: true })
+  .post("/v1/graphql", {
+    query:
+      "mutation CreateManyPosts($objects: [posts_insert_input!]!) {\n  insert_posts(objects: $objects) {\n    returning {\n      id\n      title\n      content\n      category {\n        id\n      }\n    }\n  }\n}\n",
+    variables: {
+      objects: [
+        {
+          content: "Vestibulum vulputate sapien arcu.",
+          title: "Aenean ultricies non libero sit amet pellentesque",
+          category_id: "e27156c3-9998-434f-bd5b-2b078283ff26",
+        },
+        {
+          content: "Aliquam nibh erat.",
+          title: "Etiam tincidunt ex ut auctor faucibus",
+          category_id: "e27156c3-9998-434f-bd5b-2b078283ff26",
+        },
+      ],
+    },
+    operationName: "CreateManyPosts",
+  })
+  .reply(
+    200,
+    {
+      data: {
+        insert_posts: {
+          returning: [
+            {
+              id: "286b07cd-e32f-4848-a0a9-05b997d69988",
+              title: "Aenean ultricies non libero sit amet pellentesque",
+              content: "Vestibulum vulputate sapien arcu.",
+              category: {
+                id: "e27156c3-9998-434f-bd5b-2b078283ff26",
+              },
+            },
+            {
+              id: "34275a5a-890a-47e0-a42f-dfcb2507b402",
+              title: "Etiam tincidunt ex ut auctor faucibus",
+              content: "Aliquam nibh erat.",
+              category: {
+                id: "e27156c3-9998-434f-bd5b-2b078283ff26",
+              },
+            },
+          ],
+        },
+      },
+    },
+    [
+      "Date",
+      "Wed, 10 Jan 2024 19:45:35 GMT",
+      "Content-Type",
+      "application/json; charset=utf-8",
+      "Content-Length",
+      "435",
+      "Connection",
+      "close",
+      "x-request-id",
+      "e2534521346da9672af204f2497fff57",
+      "CF-Cache-Status",
+      "DYNAMIC",
+      "Content-Security-Policy",
+      "upgrade-insecure-requests",
+      "Referrer-Policy",
+      "strict-origin-when-cross-origin",
+      "Strict-Transport-Security",
+      "max-age=31536000; includeSubDomains",
+      "X-Content-Type-Options",
+      "nosniff",
+      "X-Frame-Options",
+      "SAMEORIGIN",
+      "X-XSS-Protection",
+      "0",
+      "Server",
+      "cloudflare",
+      "CF-RAY",
+      "84376bc6ceeb68bb-BUD",
+    ],
+  );
+
+nock("https://ruling-redbird-23.hasura.app:443", { encodedQueryParams: true })
+  .post("/v1/graphql", {
+    query:
+      "mutation CreateManyPosts($objects: [PostsInsertInput!]!) {\n  insertPosts(objects: $objects) {\n    returning {\n      id\n      title\n      content\n    }\n  }\n}\n",
+    variables: {
+      objects: [
+        {
+          content: "Vestibulum vulputate sapien arcu.",
+          title: "Aenean ultricies non libero sit amet pellentesque",
+        },
+        {
+          content: "Aliquam nibh erat.",
+          title: "Etiam tincidunt ex ut auctor faucibus",
+        },
+      ],
+    },
+    operationName: "CreateManyPosts",
+  })
+  .reply(
+    200,
+    {
+      data: {
+        insertPosts: {
+          returning: [
+            {
+              id: "1fa3a0db-1af2-4520-81a2-87ec55a78747",
+              title: "Aenean ultricies non libero sit amet pellentesque",
+              content: "Vestibulum vulputate sapien arcu.",
+            },
+            {
+              id: "1772c614-f060-4fbb-b464-a204add29ea7",
+              title: "Etiam tincidunt ex ut auctor faucibus",
+              content: "Aliquam nibh erat.",
+            },
+          ],
+        },
+      },
+    },
+    [
+      "Date",
+      "Wed, 10 Jan 2024 19:45:36 GMT",
+      "Content-Type",
+      "application/json; charset=utf-8",
+      "Content-Length",
+      "320",
+      "Connection",
+      "close",
+      "x-request-id",
+      "0f8d47c96a18746037bb1c6e326a99ef",
+      "CF-Cache-Status",
+      "DYNAMIC",
+      "Content-Security-Policy",
+      "upgrade-insecure-requests",
+      "Referrer-Policy",
+      "strict-origin-when-cross-origin",
+      "Strict-Transport-Security",
+      "max-age=31536000; includeSubDomains",
+      "X-Content-Type-Options",
+      "nosniff",
+      "X-Frame-Options",
+      "SAMEORIGIN",
+      "X-XSS-Protection",
+      "0",
+      "Server",
+      "cloudflare",
+      "CF-RAY",
+      "84376bd60fb703bf-BUD",
+    ],
+  );

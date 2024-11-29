@@ -1,20 +1,24 @@
 <div align="center" style="margin: 30px;">
     <a href="https://refine.dev">
-    <img src="https://refine.ams3.cdn.digitaloceanspaces.com/refine_logo.png"  align="center" />
+    <img alt="refine logo" src="https://refine.ams3.cdn.digitaloceanspaces.com/readme/refine-readme-banner.png">
     </a>
 </div>
 <br/>
-<div align="center"><strong>refine</strong> is a <a href="https://reactjs.org/">React</a>-based framework for building data-intensive applications in no time ✨ It ships with <a href="https://ant.design/">Ant Design System</a>, an enterprise-level UI toolkit.</div>
+<div align="center">refine is an open-source, headless React framework for developers building enterprise web applications.
+
+It eliminates repetitive tasks in CRUD operations and provides industry-standard solutions for critical project components like **authentication**, **access control**, **routing**, **networking**, **state management**, and **i18n**.
+
+</div>
 <br/>
 
 <div align="center">
-  <sub>Created by <a href="https://www.pankod.com">Pankod</a></sub><br />
+  <sub>Created by <a href="https://refine.dev">refine</a></sub><br />
   <sub>CLI is forked from <a href="https://github.com/vercel/next.js/tree/canary/packages/next-codemod">next-codemod</a></sub>
 </div>
 
 ## About Refine
 
-[**refine**](https://refine.dev/) offers lots of out-of-the box functionality for rapid development, without compromising extreme customizability. Use-cases include, but are not limited to *admin panels*, *B2B applications* and *dashboards*.
+[**refine**](https://refine.dev/) offers lots of out-of-the box functionality for rapid development, without compromising extreme customizability. Use-cases include, but are not limited to _admin panels_, _B2B applications_ and _dashboards_.
 
 ## About This Tool
 
@@ -25,7 +29,7 @@ This is a code migration tool for refine to handle breaking changes that emerge 
 To see available options, run:
 
 ```sh
-npx @pankod/refine-codemod --help
+npx @refinedev/codemod --help
 ```
 
 ## General usage
@@ -33,5 +37,5 @@ npx @pankod/refine-codemod --help
 In terminal, get inside your project root folder with `cd` and initialize `refine-codemod`:
 
 ```sh
-npx @pankod/refine-codemod
+npx @refinedev/codemod
 ```

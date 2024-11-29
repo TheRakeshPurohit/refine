@@ -1,18 +1,16 @@
-import { useContext, useEffect } from "react";
-import { AuthContext } from "@contexts/auth";
+import { useEffect } from "react";
 import { useRouterContext } from "@hooks";
-
-import { IAuthContext } from "../../interfaces";
+import { useLegacyAuthContext } from "@contexts/auth";
 
 export const RouteChangeHandler: React.FC = () => {
-    const { useLocation } = useRouterContext();
+  const { useLocation } = useRouterContext();
 
-    const { checkAuth } = useContext<IAuthContext>(AuthContext);
-    const location = useLocation();
+  const { checkAuth } = useLegacyAuthContext();
+  const location = useLocation();
 
-    useEffect(() => {
-        checkAuth().catch(() => false);
-    }, [location?.pathname]);
+  useEffect(() => {
+    checkAuth?.().catch(() => false);
+  }, [location?.pathname]);
 
-    return null;
+  return null;
 };

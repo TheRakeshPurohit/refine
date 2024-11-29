@@ -1,184 +1,85 @@
 ---
-id: overview
 title: Overview
+slug: /
+displayed_sidebar: mainSidebar
 ---
 
-import architectureDiagram from '@site/static/img/getting-started/refine_architecture.png';
+## What is Refine?
 
-import benchmarkChart from '@site/static/img/getting-started/benchmark.png';
+**Refine** is a React meta-framework for CRUD-heavy web applications. It addresses a wide range of enterprise use cases including internal tools, admin panels, dashboards and B2B apps.
 
-## What is refine?
+Refine's core hooks and components streamline the development process by offering industry-standard solutions for crucial aspects of a project, including **authentication**, **access control**, **routing**, **networking**, **state management**, and **i18n**.
 
-**refine** is a [React](https://reactjs.org/)-based framework for building data-intensive applications in no time :sparkles: It ships with [Ant Design System](https://ant.design/), an enterprise-level UI toolkit.
+Refine's headless architecture enables the building of highly customizable applications by decoupling business logic from UI and routing. This allows integration with:
 
-Refine offers lots of out-of-the box functionality for rapid development, without compromising extreme customizability. Use-cases include, but are not limited to _admin panels_, _B2B applications_ and _dashboards_.
+- Any custom designs or UI frameworks like [TailwindCSS](https://tailwindcss.com/), along with built-in support for [Ant Design](https://ant.design/), [Material UI](https://mui.com/material-ui/getting-started/overview/), [Mantine](https://mantine.dev/), and [Chakra UI](https://chakra-ui.com/).
 
-###
+- Various platforms, including Next.js, Remix, React Native, Electron, etc., by a simple routing interface without the need for additional setup steps.
 
-## Key features
+## Why Refine?
 
-⚙️ **Zero-configuration**: One-line setup with [superplate](https://github.com/pankod/superplate). It takes less than a minute to start a project.
+Within the broad spectrum of development approaches, Refine occupies a unique sweet spot between “starting from scratch” with traditional development method and low-code/no-code solutions. With their respective initial pros at the beginning of development, both of the two extreme approaches may present long-term risks:
 
-📦 **Out-of-the-box** : Routing, networking, authentication, state management, i18n and UI.
+Despite offering the ultimate level flexibility, “Starting from scratch” method is likely to cause
 
-🔌 **Backend Agnostic** : Connects to any custom backend. Built-in support for [REST API](https://github.com/pankod/refine/tree/master/packages/simple-rest), [Strapi](https://strapi.io/), [NestJs CRUD](https://github.com/nestjsx/crud), [Airtable](https://www.airtable.com/), [Supabase](https://supabase.io/) and [Altogic](https://altogic.com/).
+- Project delays
+- Technical debt
+- Maintenance problems
+- Lack of development and security best practices
+- A polluted codebase
+- And lack of standardization across teams
 
-📝 **Native Typescript Core** : You can always opt out for plain Javascript.
+Low/no-code solutions address this shortcoming but create a new set of challenges such as
 
-🔘 **Decoupled UI** : UI components are exposed directly without encapsulation. You have full control on UI elements.
+- Vendor lock-in
+- Lack of customization & styling options
+- Poor developer experience
+- And limited support for complex use-cases
 
-🐜 **Powerful Default UI** : Works seamlessly with integrated [Ant Design System](https://ant.design/). (Support for multiple UI frameworks is on the Roadmap)
+Offering the best from both worlds, Refine mitigates all risks of “from scratch” development without compromising from flexibility, agility and open technologies.
 
-📝 **Boilerplate-free Code** : Keeps your codebase clean and readable.
+## Overview of the Refine structure
 
-### Motivation
+import { MUIExample } from './example/mui';
 
-Higher-level frontend frameworks can save you a lot time, but they typically offer you a trade-off between speed and flexibility.
+<MUIExample />
 
-After many years of experience in developing B2B frontend applications and working with popular frameworks, we came up with a new approach to tackle this dilemma. This is how **refine** is born.
+<br/>
 
-**Refine** is a collection of helper `hooks`, `components` and `providers`. They are all decoupled from your UI components and business logic, so they never keep you from customizing your UI or coding your own flow.
+import { MUISandpack } from './example/sandpack';
 
-As **refine** is totally _unopinionated_ about UI and logic, it's strongly _opinionated_ about three parts of your application:
+<MUISandpack />
 
-1. **API Networking**
-2. **State Management**
-3. **Authentication & Authorization**
+## Use cases
 
-We believe, these are the most important components of a data-intensive frontend application and should be handled in a robust way by leveraging industry best practices.
+**Refine** shines when it comes to _data-intensive_ applications like _admin panels_, _dashboards_ and _internal tools_.
 
-**refine** guarantees you a perfect implementation of these building blocks in your project, so you can focus on your development.
+<a href="https://refine.dev/templates/">
+<img src="https://refine.ams3.cdn.digitaloceanspaces.com/website/static/img/diagram-3.png" alt="Refine diagram" />
+</a>
 
-### Architecture
+## Key Features
 
-**refine** makes extensive use of [hooks](https://reactjs.org/docs/hooks-reference.html#gatsby-focus-wrapper) as a default way for interacting with your components.
-Under the hood, **refine** relies heavily to [React Query](https://react-query.tanstack.com/) for data handling, caching and state management.
-Access to external sources and API's happen via providers which are basically plug-in type components for extendibility.
+- Refine Devtools - dive deeper into your app and provide useful insights
+- Connectors for **15+ backend services** including [REST API](https://github.com/refinedev/refine/tree/master/packages/simple-rest), [GraphQL](https://github.com/refinedev/refine/tree/master/packages/graphql), [NestJs CRUD](https://github.com/refinedev/refine/tree/master/packages/nestjsx-crud), [Airtable](https://github.com/refinedev/refine/tree/master/packages/airtable), [Strapi](https://github.com/refinedev/refine/tree/master/packages/strapi), [Strapi v4](https://github.com/refinedev/refine/tree/master/packages/strapi-v4), [Supabase](https://github.com/refinedev/refine/tree/master/packages/supabase), [Hasura](https://github.com/refinedev/refine/tree/master/packages/hasura), [Appwrite](https://github.com/refinedev/refine/tree/master/packages/appwrite), [Firebase](https://firebase.google.com/), [Nestjs-Query](https://github.com/refinedev/refine/tree/master/packages/nestjs-query) and [Directus](https://directus.io/).
+- SSR support with Next.js & Remix and Advanced routing with any router library of your choice
+- Auto-generation of CRUD UIs based on your API data structure
+- Perfect state management & mutations with React Query
+- Providers for seamless authentication and access control flows
+- Out-of-the-box support for live / real-time applications
+- Easy audit logs & document versioning
 
-<div style={{textAlign: "center"}}>
-    <img src={architectureDiagram} width="400px" />
-</div>
+## Community
 
-### Benchmark
+**Refine** has a very friendly community and we are always happy to help you get started:
 
-After releasing the first internal versions, we had the chance to migrate some of our _React_ projects to **refine**.
-In addition to **shorter development** times and **overall performance gains**, we've measured significant reduction in project size.
+- [🌟 Apply for the Priority support program!](https://s.refine.dev/enterprise) You can apply to priority support program and receive assistance from the Refine **core** team in your **private** channel.
+- [Join the Discord community!](https://discord.gg/refine) It is the easiest way to get help and ask questions to the community.
+- [Join the GitHub Discussions](https://github.com/refinedev/refine/discussions) to ask anything about the Refine project or give feedback; we would love to hear your thoughts!
+- [Learn how to contribute to the Refine!](/docs/guides-concepts/contributing/)
 
-**refine** makes your codebase significantly smaller, by eliminating redundant code such as _reducers_, _actions_ and _unit tests_. Below is a size comparison for an example project:
+## Next Steps
 
-<div style={{textAlign: "center"}}>
-    <img src={benchmarkChart} width="400px" />
-</div>
+👉 Continue with the [Quickstart guide](/docs/getting-started/quickstart/) to setup and run your first **Refine** project.
 
-### Quick Start
-
-Run the **superplate** tool with the following command:
-
-```
-npx superplate-cli tutorial
-```
-
-Follow the _CLI wizard_ to select options and start creating your project.
-
-After setup is complete, navigate to the project folder and start your project with:
-
-```
-npm run dev
-```
-
-Your **refine** application will be accessible at [http://localhost:3000](http://localhost:3000).
-
-Replace the contents of `App.tsx` with the following code:
-
-```tsx title="App.tsx"
-import {
-    Refine,
-    useTable,
-    List,
-    Table,
-    useMany,
-    DateField,
-} from "@pankod/refine";
-import routerProvider from "@pankod/refine-react-router";
-import dataProvider from "@pankod/refine-simple-rest";
-
-import "@pankod/refine/dist/styles.min.css";
-
-const App: React.FC = () => {
-    return (
-        <Refine
-            routerProvider={routerProvider}
-            dataProvider={dataProvider("https://api.fake-rest.refine.dev")}
-            resources={[{ name: "posts", list: PostList }]}
-        />
-    );
-};
-
-export const PostList: React.FC = () => {
-    const { tableProps } = useTable<IPost>();
-
-    const categoryIds =
-        tableProps?.dataSource?.map((item) => item.category.id) ?? [];
-
-    const { data, isLoading } = useMany<ICategory>({
-        resource: "categories",
-        ids: categoryIds,
-        queryOptions: {
-            enabled: categoryIds.length > 0,
-        },
-    });
-
-    return (
-        <List>
-            <Table<IPost> {...tableProps} rowKey="id">
-                <Table.Column dataIndex="title" title="title" />
-                <Table.Column
-                    dataIndex={["category", "id"]}
-                    title="category"
-                    render={(value: string) => {
-                        if (isLoading) {
-                            return "loading...";
-                        }
-
-                        return data?.data.find(
-                            (item: ICategory) => item.id === value,
-                        )?.title;
-                    }}
-                />
-                <Table.Column
-                    dataIndex="createdAt"
-                    title="createdAt"
-                    render={(value) => <DateField format="LLL" value={value} />}
-                />
-            </Table>
-        </List>
-    );
-};
-
-export default App;
-```
-
-```tsx title="interfaces.d.ts"
-interface IPost {
-    title: string;
-    createdAt: string;
-    category: ICategory;
-}
-
-interface ICategory {
-    id: string;
-    title: string;
-}
-```
-
-### Roadmap
-
-☑️ NextJS & SSR support
-
-☑️ Support for more data & auth providers
-
-☑️ Support for more UI frameworks (MaterialUI, Chakra, Spectrum etc.)
-
-## Special Thanks
-
-[React Admin](https://marmelab.com/react-admin/) has been a great source of ideas and inspiration for refine. Big thanks to friends at [Marmelab](https://marmelab.com) for the amazing work they are doing.
+👉 Jump directly to the [Tutorial](/tutorial) to learn Refine by building a full-blown CRUD application.

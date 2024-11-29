@@ -1,43 +1,53 @@
 import { useCallback } from "react";
-import { IResourceItem } from "@contexts/resource";
+
 import { useNavigation } from "@hooks";
 
+import type { BaseKey, MetaDataQuery } from "../../contexts/data/types";
+import type { IResourceItem } from "../../contexts/resource/types";
+import type { RedirectAction } from "../form/types";
+
 export type UseRedirectionAfterSubmissionType = () => (options: {
-    redirect: "show" | "list" | "edit" | false;
-    resource: IResourceItem;
-    id?: string;
+  redirect: RedirectAction;
+  resource?: IResourceItem;
+  id?: BaseKey;
+  meta?: MetaDataQuery;
 }) => void;
 
 export const useRedirectionAfterSubmission: UseRedirectionAfterSubmissionType =
-    () => {
-        const { show, edit, list } = useNavigation();
+  () => {
+    const { show, edit, list, create } = useNavigation();
 
-        const handleSubmitWithRedirect = useCallback(
-            ({
-                redirect,
-                resource,
-                id,
-            }: {
-                redirect: "show" | "list" | "edit" | false;
-                resource: IResourceItem;
-                id?: string;
-            }) => {
-                if (redirect && resource.route) {
-                    if (resource.canShow && redirect === "show" && id) {
-                        return show(resource.route, id);
-                    }
+    const handleSubmitWithRedirect = useCallback(
+      ({
+        redirect,
+        resource,
+        id,
+        meta = {},
+      }: {
+        redirect: RedirectAction;
+        resource?: IResourceItem;
+        id?: BaseKey;
+        meta?: MetaDataQuery;
+      }) => {
+        if (redirect && resource) {
+          if (!!resource.show && redirect === "show" && id) {
+            return show(resource, id, undefined, meta);
+          }
 
-                    if (resource.canEdit && redirect === "edit" && id) {
-                        return edit(resource.route, id);
-                    }
+          if (!!resource.edit && redirect === "edit" && id) {
+            return edit(resource, id, undefined, meta);
+          }
 
-                    return list(resource.route, "push");
-                } else {
-                    return;
-                }
-            },
-            [],
-        );
+          if (!!resource.create && redirect === "create") {
+            return create(resource, undefined, meta);
+          }
 
-        return handleSubmitWithRedirect;
-    };
+          return list(resource, "push", meta);
+        }
+        return;
+      },
+      [],
+    );
+
+    return handleSubmitWithRedirect;
+  };

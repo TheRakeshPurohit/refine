@@ -1,57 +1,60 @@
 import React from "react";
-import { render, fireEvent, TestWrapper, act } from "@test";
-import ReactRouterDom from "react-router-dom";
+import { render, TestWrapper, act } from "@test";
 
 import { RouteChangeHandler } from "./index";
 
 const mockAuthProvider = {
-    login: () => Promise.resolve(),
-    logout: () => Promise.resolve(),
-    checkError: () => Promise.resolve(),
-    checkAuth: () => Promise.resolve(),
-    getPermissions: () => Promise.resolve(["admin"]),
-    getUserIdentity: () => Promise.resolve(),
-    isProvided: true,
+  login: () => Promise.resolve(),
+  logout: () => Promise.resolve(),
+  checkError: () => Promise.resolve(),
+  checkAuth: () => Promise.resolve(),
+  getPermissions: () => Promise.resolve(["admin"]),
+  getUserIdentity: () => Promise.resolve(),
+  isProvided: true,
 };
 
 describe("routeChangeHandler", () => {
-    it("should render successful", () => {
-        const { container } = render(<RouteChangeHandler />, {
-            wrapper: TestWrapper({
-                resources: [{ name: "posts" }],
-            }),
-        });
-
-        expect(container.innerHTML).toHaveLength(0);
+  it("should render successful", () => {
+    const { container } = render(<RouteChangeHandler />, {
+      wrapper: TestWrapper({
+        resources: [{ name: "posts" }],
+      }),
     });
 
-    it("should call checkAuth on route change", () => {
-        const checkAuthMockedAuthProvider = {
-            ...mockAuthProvider,
-            checkAuth: jest.fn().mockImplementation(() => Promise.resolve()),
-        };
+    expect(container.innerHTML).toHaveLength(0);
+  });
 
-        render(<RouteChangeHandler />, {
-            wrapper: TestWrapper({
-                authProvider: checkAuthMockedAuthProvider,
-            }),
-        });
+  it("should call checkAuth on route change", async () => {
+    const checkAuthMockedAuthProvider = {
+      ...mockAuthProvider,
+      checkAuth: jest.fn().mockImplementation(() => Promise.resolve()),
+    };
 
-        expect(checkAuthMockedAuthProvider.checkAuth).toBeCalledTimes(1);
+    await act(async () => {
+      render(<RouteChangeHandler />, {
+        wrapper: TestWrapper({
+          legacyAuthProvider: checkAuthMockedAuthProvider,
+        }),
+      });
     });
 
-    it("should ignore checkAuth Promise.reject", () => {
-        const checkAuthMockedAuthProvider = {
-            ...mockAuthProvider,
-            checkAuth: jest.fn().mockImplementation(() => Promise.reject()),
-        };
+    expect(checkAuthMockedAuthProvider.checkAuth).toBeCalledTimes(1);
+  });
 
-        render(<RouteChangeHandler />, {
-            wrapper: TestWrapper({
-                authProvider: checkAuthMockedAuthProvider,
-            }),
-        });
+  it("should ignore checkAuth Promise.reject", async () => {
+    const checkAuthMockedAuthProvider = {
+      ...mockAuthProvider,
+      checkAuth: jest.fn().mockImplementation(() => Promise.reject()),
+    };
 
-        expect(checkAuthMockedAuthProvider.checkAuth).toBeCalledTimes(1);
+    await act(async () => {
+      render(<RouteChangeHandler />, {
+        wrapper: TestWrapper({
+          legacyAuthProvider: checkAuthMockedAuthProvider,
+        }),
+      });
     });
+
+    expect(checkAuthMockedAuthProvider.checkAuth).toBeCalledTimes(1);
+  });
 });

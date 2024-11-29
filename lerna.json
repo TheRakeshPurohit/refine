@@ -1,12 +1,8 @@
 {
-  "packages": [
-    "packages/*",
-    "examples/fineFoods/**/*"
-  ],
-  "registry": "https://registry.npmjs.org/",
-  "npmClient": "npm",
-  "publishConfig": {
-    "access": "public"
-  },
-  "version": "2.0.11"
+  "$schema": "node_modules/lerna/schemas/lerna-schema.json",
+  "packages": ["packages/*", "examples/*"],
+  "ignore": "{monorepo-*,with-nx,blog-react-aria,blog-sveltekit-crud}",
+  "version": "4.0.0",
+  "stream": true,
+  "npmClient": "pnpm"
 }

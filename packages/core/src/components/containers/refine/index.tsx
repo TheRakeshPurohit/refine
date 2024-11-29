@@ -1,200 +1,217 @@
 import React from "react";
-import { ConfigProvider, notification } from "antd";
-import { ConfigProviderProps } from "antd/lib/config-provider";
-import { ConfigProps } from "antd/lib/notification";
-import {
-    QueryClientProvider,
-    QueryClient,
-    QueryCache,
-    MutationCache,
-    DefaultOptions,
-} from "react-query";
 
-import { ReactQueryDevtools } from "react-query/devtools";
+import { useQuerySubscription } from "@refinedev/devtools-internal";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-import { AuthContextProvider } from "@contexts/auth";
-import { DataContextProvider } from "@contexts/data";
-import {
-    defaultProvider,
-    TranslationContextProvider,
-} from "@contexts/translation";
-import { ResourceContextProvider, IResourceItem } from "@contexts/resource";
-import { RefineContextProvider } from "@contexts/refine";
-import { NotificationContextProvider } from "@contexts/notification";
-import { UnsavedWarnContextProvider } from "@contexts/unsavedWarn";
-import { RouterContextProvider } from "@contexts/router";
 import { ReadyPage as DefaultReadyPage, RouteChangeHandler } from "@components";
-import { defaultConfigProviderProps } from "@definitions";
+import { Telemetry } from "@components/telemetry";
+import { handleRefineOptions } from "@definitions";
+import { useDeepMemo } from "@hooks/deepMemo";
+
+import { AccessControlContextProvider } from "../../../contexts/accessControl";
+import { AuditLogContextProvider } from "../../../contexts/auditLog";
 import {
-    MutationMode,
-    IDataContextProvider,
-    IAuthContext,
-    I18nProvider,
-    LayoutProps,
-    TitleProps,
-    IRouterProvider,
-    ResourceProps,
-} from "../../../interfaces";
+  AuthBindingsContextProvider,
+  LegacyAuthContextProvider,
+} from "../../../contexts/auth";
+import { DataContextProvider } from "../../../contexts/data";
+import { I18nContextProvider } from "../../../contexts/i18n";
+import { LiveContextProvider } from "../../../contexts/live";
+import { NotificationContextProvider } from "../../../contexts/notification";
+import { RefineContextProvider } from "../../../contexts/refine";
+import { ResourceContextProvider } from "../../../contexts/resource";
+import { RouterContextProvider } from "../../../contexts/router";
+import { LegacyRouterContextProvider } from "../../../contexts/router/legacy";
+import { RouterPickerProvider } from "../../../contexts/router/picker";
+import { UndoableQueueContextProvider } from "../../../contexts/undoableQueue";
+import { UnsavedWarnContextProvider } from "../../../contexts/unsavedWarn";
 
-interface QueryClientConfig {
-    queryCache?: QueryCache;
-    mutationCache?: MutationCache;
-    defaultOptions?: DefaultOptions;
-}
-
-interface IResource extends IResourceItem, ResourceProps {}
-export interface RefineProps {
-    authProvider?: IAuthContext;
-    dataProvider: IDataContextProvider;
-    routerProvider: IRouterProvider;
-    resources?: IResource[];
-    i18nProvider?: I18nProvider;
-    catchAll?: React.ReactNode;
-    LoginPage?: React.FC;
-    DashboardPage?: React.FC;
-    ReadyPage?: React.FC;
-    mutationMode?: MutationMode;
-    syncWithLocation?: boolean;
-    warnWhenUnsavedChanges?: boolean;
-    configProviderProps?: ConfigProviderProps;
-    undoableTimeout?: number;
-    Layout?: React.FC<LayoutProps>;
-    Sider?: React.FC;
-    Header?: React.FC;
-    Footer?: React.FC;
-    OffLayoutArea?: React.FC;
-    Title?: React.FC<TitleProps>;
-    reactQueryClientConfig?: QueryClientConfig;
-    notifcationConfig?: ConfigProps;
-    reactQueryDevtoolConfig?: any;
-}
+import type { RefineProps } from "../../../contexts/refine/types";
+import { useRouterMisuseWarning } from "../../../hooks/router/use-router-misuse-warning/index";
 
 /**
- * {@link https://refine.dev/docs/api-references/components/refine-config `<Refine> component`} is the entry point of a refine app.
+ * {@link https://refine.dev/docs/api-reference/core/components/refine-config `<Refine> component`} is the entry point of a refine app.
  * It is where the highest level of configuration of the app occurs.
  * Only a dataProvider is required to bootstrap the app. After adding a dataProvider, resources can be added as property.
  *
- * @see {@link https://refine.dev/docs/api-references/components/refine-config} for more details.
+ * @see {@link https://refine.dev/docs/api-reference/core/components/refine-config} for more details.
  */
 export const Refine: React.FC<RefineProps> = ({
-    authProvider,
-    dataProvider,
-    routerProvider,
-    resources: resourcesFromProps,
-    DashboardPage,
-    ReadyPage,
-    LoginPage,
-    catchAll,
-    children,
-    i18nProvider = defaultProvider.i18nProvider,
-    mutationMode = "pessimistic",
-    syncWithLocation = false,
-    warnWhenUnsavedChanges = false,
-    configProviderProps = defaultConfigProviderProps,
-    undoableTimeout = 5000,
-    Title,
-    Layout,
-    Sider,
-    Header,
-    Footer,
-    OffLayoutArea,
-    reactQueryClientConfig,
-    reactQueryDevtoolConfig,
-    notifcationConfig,
+  legacyAuthProvider,
+  authProvider,
+  dataProvider,
+  legacyRouterProvider,
+  routerProvider,
+  notificationProvider,
+  accessControlProvider,
+  auditLogProvider,
+  resources,
+  DashboardPage,
+  ReadyPage,
+  LoginPage,
+  catchAll,
+  children,
+  liveProvider,
+  i18nProvider,
+  Title,
+  Layout,
+  Sider,
+  Header,
+  Footer,
+  OffLayoutArea,
+  onLiveEvent,
+  options,
 }) => {
-    const queryClient = new QueryClient({
-        ...reactQueryClientConfig,
-        defaultOptions: {
-            ...reactQueryClientConfig?.defaultOptions,
-            queries: {
-                refetchOnWindowFocus: false,
-                keepPreviousData: true,
-                ...reactQueryClientConfig?.defaultOptions?.queries,
-            },
-        },
-    });
+  const {
+    optionsWithDefaults,
+    disableTelemetryWithDefault,
+    reactQueryWithDefaults,
+  } = handleRefineOptions({
+    options,
+  });
 
-    notification.config({ ...notifcationConfig });
-
-    const resources: IResourceItem[] = [];
-
-    resourcesFromProps?.map((resource) => {
-        resources.push({
-            name: resource.name,
-            label: resource.options?.label,
-            icon: resource.icon,
-            route: resource.options?.route ?? resource.name,
-            canCreate: !!resource.create,
-            canEdit: !!resource.edit,
-            canShow: !!resource.show,
-            canDelete: resource.canDelete,
-            create: resource.create,
-            show: resource.show,
-            list: resource.list,
-            edit: resource.edit,
-        });
-    });
-
-    if (resources.length === 0) {
-        return ReadyPage ? <ReadyPage /> : <DefaultReadyPage />;
+  const queryClient = useDeepMemo(() => {
+    if (reactQueryWithDefaults.clientConfig instanceof QueryClient) {
+      return reactQueryWithDefaults.clientConfig;
     }
 
-    const { RouterComponent } = routerProvider;
+    return new QueryClient({
+      ...reactQueryWithDefaults.clientConfig,
+      defaultOptions: {
+        ...reactQueryWithDefaults.clientConfig.defaultOptions,
+        queries: {
+          refetchOnWindowFocus: false,
+          keepPreviousData: true,
+          ...reactQueryWithDefaults.clientConfig.defaultOptions?.queries,
+        },
+      },
+    });
+  }, [reactQueryWithDefaults.clientConfig]);
 
-    return (
-        <QueryClientProvider client={queryClient}>
-            <AuthContextProvider {...authProvider} isProvided={!!authProvider}>
-                <DataContextProvider {...dataProvider}>
-                    <RouterContextProvider {...routerProvider}>
-                        <ResourceContextProvider resources={resources}>
-                            <TranslationContextProvider
-                                i18nProvider={i18nProvider}
+  useQuerySubscription(queryClient);
+
+  const useNotificationProviderValues = React.useMemo(() => {
+    return typeof notificationProvider === "function"
+      ? notificationProvider
+      : () => notificationProvider;
+  }, [notificationProvider]);
+
+  const notificationProviderContextValues = useNotificationProviderValues();
+
+  /**
+   * Warn our users if they are using the old way of routing in the wrong prop.
+   */
+  useRouterMisuseWarning(routerProvider);
+  /** */
+
+  /**
+   * `<ReadyPage />` is only used in the legacy routing and is not used in the new routing.
+   * If `legacyRouterProvider` is provided and `routerProvider` is not, we'll check for the `resources` prop to be empty.
+   * If `resources` is empty, then we'll render `<ReadyPage />` component.
+   */
+  if (
+    legacyRouterProvider &&
+    !routerProvider &&
+    (resources ?? []).length === 0
+  ) {
+    return ReadyPage ? <ReadyPage /> : <DefaultReadyPage />;
+  }
+
+  /** Router
+   *
+   * Handle routing from `RouterContextProvider` and `router` prop for the brand new way
+   * If `router` is not provided, then we'r checking for `routerProvider` prop
+   * If `routerProvider` is provided, then `RouterContextProvider` is used
+   * If none of them is provided, then `RouterContextProvider` is used because it supports undefined router
+   *
+   * `RouterContextProvider` is skipped whenever possible and by this way,
+   * we can achieve backward compability only when its provided by user
+   *
+   */
+  const { RouterComponent = React.Fragment } = !routerProvider
+    ? legacyRouterProvider ?? {}
+    : {};
+  /** */
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <NotificationContextProvider {...notificationProviderContextValues}>
+        <LegacyAuthContextProvider
+          {...(legacyAuthProvider ?? {})}
+          isProvided={Boolean(legacyAuthProvider)}
+        >
+          <AuthBindingsContextProvider
+            {...(authProvider ?? {})}
+            isProvided={Boolean(authProvider)}
+          >
+            <DataContextProvider dataProvider={dataProvider}>
+              <LiveContextProvider liveProvider={liveProvider}>
+                <RouterPickerProvider
+                  value={
+                    legacyRouterProvider && !routerProvider ? "legacy" : "new"
+                  }
+                >
+                  <RouterContextProvider router={routerProvider}>
+                    <LegacyRouterContextProvider {...legacyRouterProvider}>
+                      <ResourceContextProvider resources={resources ?? []}>
+                        <I18nContextProvider i18nProvider={i18nProvider}>
+                          <AccessControlContextProvider
+                            {...(accessControlProvider ?? {})}
+                          >
+                            <AuditLogContextProvider
+                              {...(auditLogProvider ?? {})}
                             >
-                                <ConfigProvider {...configProviderProps}>
-                                    <NotificationContextProvider>
-                                        <RefineContextProvider
-                                            mutationMode={mutationMode}
-                                            warnWhenUnsavedChanges={
-                                                warnWhenUnsavedChanges
-                                            }
-                                            syncWithLocation={syncWithLocation}
-                                            Title={Title}
-                                            undoableTimeout={undoableTimeout}
-                                            catchAll={catchAll}
-                                            DashboardPage={DashboardPage}
-                                            LoginPage={LoginPage}
-                                            Layout={Layout}
-                                            Sider={Sider}
-                                            Footer={Footer}
-                                            Header={Header}
-                                            OffLayoutArea={OffLayoutArea}
-                                            hasDashboard={!!DashboardPage}
-                                        >
-                                            <UnsavedWarnContextProvider>
-                                                <>
-                                                    {children}
-                                                    {RouterComponent ? (
-                                                        <RouterComponent>
-                                                            <RouteChangeHandler />
-                                                        </RouterComponent>
-                                                    ) : (
-                                                        <RouteChangeHandler />
-                                                    )}
-                                                </>
-                                            </UnsavedWarnContextProvider>
-                                        </RefineContextProvider>
-                                    </NotificationContextProvider>
-                                </ConfigProvider>
-                            </TranslationContextProvider>
-                        </ResourceContextProvider>
-                    </RouterContextProvider>
-                </DataContextProvider>
-            </AuthContextProvider>
-            <ReactQueryDevtools
-                initialIsOpen={false}
-                position="bottom-right"
-                {...reactQueryDevtoolConfig}
-            />
-        </QueryClientProvider>
-    );
+                              <UndoableQueueContextProvider>
+                                <RefineContextProvider
+                                  mutationMode={
+                                    optionsWithDefaults.mutationMode
+                                  }
+                                  warnWhenUnsavedChanges={
+                                    optionsWithDefaults.warnWhenUnsavedChanges
+                                  }
+                                  syncWithLocation={
+                                    optionsWithDefaults.syncWithLocation
+                                  }
+                                  Title={Title}
+                                  undoableTimeout={
+                                    optionsWithDefaults.undoableTimeout
+                                  }
+                                  catchAll={catchAll}
+                                  DashboardPage={DashboardPage}
+                                  LoginPage={LoginPage}
+                                  Layout={Layout}
+                                  Sider={Sider}
+                                  Footer={Footer}
+                                  Header={Header}
+                                  OffLayoutArea={OffLayoutArea}
+                                  hasDashboard={!!DashboardPage}
+                                  liveMode={optionsWithDefaults.liveMode}
+                                  onLiveEvent={onLiveEvent}
+                                  options={optionsWithDefaults}
+                                >
+                                  <UnsavedWarnContextProvider>
+                                    <RouterComponent>
+                                      {children}
+                                      {!disableTelemetryWithDefault && (
+                                        <Telemetry />
+                                      )}
+                                      <RouteChangeHandler />
+                                    </RouterComponent>
+                                  </UnsavedWarnContextProvider>
+                                </RefineContextProvider>
+                              </UndoableQueueContextProvider>
+                            </AuditLogContextProvider>
+                          </AccessControlContextProvider>
+                        </I18nContextProvider>
+                      </ResourceContextProvider>
+                    </LegacyRouterContextProvider>
+                  </RouterContextProvider>
+                </RouterPickerProvider>
+              </LiveContextProvider>
+            </DataContextProvider>
+          </AuthBindingsContextProvider>
+        </LegacyAuthContextProvider>
+      </NotificationContextProvider>
+    </QueryClientProvider>
+  );
 };

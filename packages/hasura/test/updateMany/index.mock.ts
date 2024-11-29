@@ -1,139 +1,397 @@
 import nock from "nock";
 
 nock("https://flowing-mammal-24.hasura.app:443", { encodedQueryParams: true })
-    .post("/v1/graphql", {
-        query: "mutation ($where: posts_bool_exp!, $_set: posts_set_input!) {\n  update_posts (where: $where, _set: $_set) {\n    returning { id, title, content }\n  }\n}",
-        variables: {
-            where: {
-                id: {
-                    _in: [
-                        "487524fd-1160-45c8-a28d-717f78893c37",
-                        "55c37980-05e5-45b3-8368-a2d8c2210436",
-                    ],
-                },
-            },
-            _set: { content: "Vel deserunt rerum et." },
+  .post("/v1/graphql", {
+    query:
+      "mutation UpdateManyPosts($where: posts_bool_exp!, $_set: posts_set_input!) {\n  update_posts(where: $where, _set: $_set) {\n    returning {\n      id\n      id\n      title\n      content\n    }\n  }\n}\n",
+    variables: {
+      where: {
+        id: {
+          _in: [
+            "85e2f56d-53e9-4d43-8099-4c7622c8e8e1",
+            "881a45fd-a5da-46f4-a045-58eeb647862f",
+          ],
         },
-    })
-    .reply(
-        200,
-        [
-            "1f8b0800000000000403a58d4b0e83300c05af12794daa7c49e020dd545545135321d10405b342dcbd41ed0dbab2fd9e35b3431c68807e876da91b3e96bcd27ade05692b694a2f603dbbed3045e8c1786795192397b215dcd8e0f9a07ce44ebad179dfe9a01d344013cd58dfbfccc8c79cb9ac79c88930516dae38b3882b962d112b75bc19d2058e86fd4cd65654e70517166d353d35f7ba3d75d107a5a430bafdcb743f8ee303bd0e6cdafe000000",
-        ],
-        [
-            "Date",
-            "Tue, 19 Oct 2021 13:00:38 GMT",
-            "Content-Type",
-            "application/json; charset=utf-8",
-            "Transfer-Encoding",
-            "chunked",
-            "Connection",
-            "close",
-            "x-request-id",
-            "0c952a8e38c209c55da473e874af3fdc",
-            "Content-Encoding",
-            "gzip",
-            "Strict-Transport-Security",
-            "max-age=31536000; includeSubDomains",
-            "CF-Cache-Status",
-            "DYNAMIC",
-            "Expect-CT",
-            'max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"',
-            "Server",
-            "cloudflare",
-            "CF-RAY",
-            "6a0a30ba4c535481-IST",
-        ],
-    );
+      },
+      _set: { content: "Updated Content" },
+    },
+    operationName: "UpdateManyPosts",
+  })
+  .reply(
+    200,
+    {
+      data: {
+        update_posts: {
+          returning: [
+            {
+              id: "85e2f56d-53e9-4d43-8099-4c7622c8e8e1",
+              title: "Aenean ultricies non libero sit amet pellentesque",
+              content: "Updated Content",
+            },
+            {
+              id: "881a45fd-a5da-46f4-a045-58eeb647862f",
+              title: "Etiam tincidunt ex ut auctor faucibus",
+              content: "Updated Content",
+            },
+          ],
+        },
+      },
+    },
+    [
+      "Date",
+      "Mon, 15 Jan 2024 08:14:14 GMT",
+      "Content-Type",
+      "application/json; charset=utf-8",
+      "Content-Length",
+      "300",
+      "Connection",
+      "close",
+      "x-request-id",
+      "9b18068ecca92823b80378748040bf35",
+      "CF-Cache-Status",
+      "DYNAMIC",
+      "Content-Security-Policy",
+      "upgrade-insecure-requests",
+      "Referrer-Policy",
+      "strict-origin-when-cross-origin",
+      "Strict-Transport-Security",
+      "max-age=31536000; includeSubDomains",
+      "X-Content-Type-Options",
+      "nosniff",
+      "X-Frame-Options",
+      "SAMEORIGIN",
+      "X-XSS-Protection",
+      "0",
+      "Server",
+      "cloudflare",
+      "CF-RAY",
+      "845ca9f6df556846-BUD",
+    ],
+  );
 
 nock("https://flowing-mammal-24.hasura.app:443", { encodedQueryParams: true })
-    .post("/v1/graphql", {
-        query: "mutation ($where: posts_bool_exp!, $_set: posts_set_input!) {\n  update_posts (where: $where, _set: $_set) {\n    returning { id }\n  }\n}",
-        variables: {
-            where: {
-                id: {
-                    _in: [
-                        "487524fd-1160-45c8-a28d-717f78893c37",
-                        "55c37980-05e5-45b3-8368-a2d8c2210436",
-                    ],
-                },
-            },
-            _set: { title: "updated-foo-1", content: "updated-bar-1" },
+  .post("/v1/graphql", {
+    query:
+      "mutation UpdateManyPosts($where: posts_bool_exp!, $_set: posts_set_input!) {\n  update_posts(where: $where, _set: $_set) {\n    returning {\n      id\n    }\n  }\n}\n",
+    variables: {
+      where: {
+        id: {
+          _in: [
+            "b8a4c5ee-16a0-4c90-bc8d-84ae7085c575",
+            "71cc13bf-6261-4cd4-a892-22250eb0f6b3",
+          ],
         },
-    })
-    .reply(
-        200,
-        [
-            "1f8b08000000000004032d8bcb0ac32010007f45f6dc055fab1b7f259462d5945cd2909893f8ef35d0db0ccc34c8b146080dae7d5079eddfb39eb71fa55ec7b66e1f1041cc0dd60c012c7bd276c9a8949368293146cd19bdf28b679e4c321efa43fc73a2e1134b945468e46f836cdcfd644e5a2b698d83feecbdff00f6692c0888000000",
-        ],
-        [
-            "Date",
-            "Tue, 19 Oct 2021 13:03:07 GMT",
-            "Content-Type",
-            "application/json; charset=utf-8",
-            "Transfer-Encoding",
-            "chunked",
-            "Connection",
-            "close",
-            "x-request-id",
-            "58639b0036af33e1a8fbb73cf73234fc",
-            "Content-Encoding",
-            "gzip",
-            "Strict-Transport-Security",
-            "max-age=31536000; includeSubDomains",
-            "CF-Cache-Status",
-            "DYNAMIC",
-            "Expect-CT",
-            'max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"',
-            "Server",
-            "cloudflare",
-            "CF-RAY",
-            "6a0a345b2cdd5488-IST",
-        ],
-    );
+      },
+      _set: {
+        title: "Multiple Updated Title",
+        content: "Multiple Updated Content",
+      },
+    },
+    operationName: "UpdateManyPosts",
+  })
+  .reply(
+    200,
+    {
+      data: {
+        update_posts: {
+          returning: [
+            { id: "b8a4c5ee-16a0-4c90-bc8d-84ae7085c575" },
+            { id: "71cc13bf-6261-4cd4-a892-22250eb0f6b3" },
+          ],
+        },
+      },
+    },
+    [
+      "Date",
+      "Mon, 15 Jan 2024 08:14:14 GMT",
+      "Content-Type",
+      "application/json; charset=utf-8",
+      "Content-Length",
+      "136",
+      "Connection",
+      "close",
+      "x-request-id",
+      "dd77da1724d32ac349dd1a4f1ac91145",
+      "CF-Cache-Status",
+      "DYNAMIC",
+      "Content-Security-Policy",
+      "upgrade-insecure-requests",
+      "Referrer-Policy",
+      "strict-origin-when-cross-origin",
+      "Strict-Transport-Security",
+      "max-age=31536000; includeSubDomains",
+      "X-Content-Type-Options",
+      "nosniff",
+      "X-Frame-Options",
+      "SAMEORIGIN",
+      "X-XSS-Protection",
+      "0",
+      "Server",
+      "cloudflare",
+      "CF-RAY",
+      "845ca9fb6a751ce6-BUD",
+    ],
+  );
+
+nock("https://ruling-redbird-23.hasura.app:443", { encodedQueryParams: true })
+  .post("/v1/graphql", {
+    query:
+      "mutation UpdateManyPosts($where: PostsBoolExp!, $_set: PostsSetInput!) {\n  updatePosts(where: $where, _set: $_set) {\n    returning {\n      id\n      id\n      title\n      content\n    }\n  }\n}\n",
+    variables: {
+      where: {
+        id: {
+          _in: [
+            "4ec22cb3-b679-4891-a489-3d19cf275ab3",
+            "ae316d48-025a-47db-b4c0-ff4694f52c85",
+          ],
+        },
+      },
+      _set: { content: "Updated Content" },
+    },
+    operationName: "UpdateManyPosts",
+  })
+  .reply(
+    200,
+    {
+      data: {
+        updatePosts: {
+          returning: [
+            {
+              id: "4ec22cb3-b679-4891-a489-3d19cf275ab3",
+              title: "Aenean ultricies non libero sit amet pellentesque",
+              content: "Updated Content",
+            },
+            {
+              id: "ae316d48-025a-47db-b4c0-ff4694f52c85",
+              title: "Etiam tincidunt ex ut auctor faucibus",
+              content: "Updated Content",
+            },
+          ],
+        },
+      },
+    },
+    [
+      "Date",
+      "Mon, 15 Jan 2024 08:14:15 GMT",
+      "Content-Type",
+      "application/json; charset=utf-8",
+      "Content-Length",
+      "299",
+      "Connection",
+      "close",
+      "x-request-id",
+      "93cb875bd6f13a75ec1846a367c1b1a6",
+      "CF-Cache-Status",
+      "DYNAMIC",
+      "Content-Security-Policy",
+      "upgrade-insecure-requests",
+      "Referrer-Policy",
+      "strict-origin-when-cross-origin",
+      "Strict-Transport-Security",
+      "max-age=31536000; includeSubDomains",
+      "X-Content-Type-Options",
+      "nosniff",
+      "X-Frame-Options",
+      "SAMEORIGIN",
+      "X-XSS-Protection",
+      "0",
+      "Server",
+      "cloudflare",
+      "CF-RAY",
+      "845ca9ff8e40733a-BUD",
+    ],
+  );
+
+nock("https://ruling-redbird-23.hasura.app:443", { encodedQueryParams: true })
+  .post("/v1/graphql", {
+    query:
+      "mutation UpdateManyPosts($where: PostsBoolExp!, $_set: PostsSetInput!) {\n  updatePosts(where: $where, _set: $_set) {\n    returning {\n      id\n    }\n  }\n}\n",
+    variables: {
+      where: {
+        id: {
+          _in: [
+            "3d71a408-ac30-41f2-b530-3fe951b16b86",
+            "9cff1379-349e-4a4c-b436-b18d12857c5c",
+          ],
+        },
+      },
+      _set: {
+        title: "Multiple Updated Title",
+        content: "Multiple Updated Content",
+      },
+    },
+    operationName: "UpdateManyPosts",
+  })
+  .reply(
+    200,
+    {
+      data: {
+        updatePosts: {
+          returning: [
+            { id: "3d71a408-ac30-41f2-b530-3fe951b16b86" },
+            { id: "9cff1379-349e-4a4c-b436-b18d12857c5c" },
+          ],
+        },
+      },
+    },
+    [
+      "Date",
+      "Mon, 15 Jan 2024 08:14:16 GMT",
+      "Content-Type",
+      "application/json; charset=utf-8",
+      "Content-Length",
+      "135",
+      "Connection",
+      "close",
+      "x-request-id",
+      "f9c6524b650963a68da303f687b415c1",
+      "CF-Cache-Status",
+      "DYNAMIC",
+      "Content-Security-Policy",
+      "upgrade-insecure-requests",
+      "Referrer-Policy",
+      "strict-origin-when-cross-origin",
+      "Strict-Transport-Security",
+      "max-age=31536000; includeSubDomains",
+      "X-Content-Type-Options",
+      "nosniff",
+      "X-Frame-Options",
+      "SAMEORIGIN",
+      "X-XSS-Protection",
+      "0",
+      "Server",
+      "cloudflare",
+      "CF-RAY",
+      "845caa049aec1cc8-BUD",
+    ],
+  );
 
 nock("https://flowing-mammal-24.hasura.app:443", { encodedQueryParams: true })
-    .post("/v1/graphql", {
-        query: "mutation ($where: posts_bool_exp!, $_set: posts_set_input!) {\n  update_posts (where: $where, _set: $_set) {\n    returning { id }\n  }\n}",
-        variables: {
-            where: {
-                id: {
-                    _in: [
-                        "487524fd-1160-45c8-a28d-717f78893c37",
-                        "55c37980-05e5-45b3-8368-a2d8c2210436",
-                    ],
-                },
+  .post("/v1/graphql", {
+    query:
+      "mutation UpdateManyPosts($ids: [uuid!]!, $_set: posts_set_input!) {\n  update_posts(where: {id: {_in: $ids}}, _set: $_set) {\n    returning {\n      id\n      title\n      content\n    }\n  }\n}\n",
+    variables: {
+      ids: [
+        "85e2f56d-53e9-4d43-8099-4c7622c8e8e1",
+        "881a45fd-a5da-46f4-a045-58eeb647862f",
+      ],
+      _set: { content: "Updated Content" },
+    },
+    operationName: "UpdateManyPosts",
+  })
+  .reply(
+    200,
+    {
+      data: {
+        update_posts: {
+          returning: [
+            {
+              id: "85e2f56d-53e9-4d43-8099-4c7622c8e8e1",
+              title: "Aenean ultricies non libero sit amet pellentesque",
+              content: "Updated Content",
             },
-            _set: { title: "updated-foo-1", content: "updated-bar-1" },
+            {
+              id: "881a45fd-a5da-46f4-a045-58eeb647862f",
+              title: "Etiam tincidunt ex ut auctor faucibus",
+              content: "Updated Content",
+            },
+          ],
         },
-    })
-    .reply(
-        200,
-        [
-            "1f8b08000000000004032d8bcb0ac32010007f45f6dc055fab1b7f259462d5945cd2909893f8ef35d0db0ccc34c8b146080dae7d5079eddfb39eb71fa55ec7b66e1f1041cc0dd60c012c7bd276c9a8949368293146cd19bdf28b679e4c321efa43fc73a2e1134b945468e46f836cdcfd644e5a2b698d83feecbdff00f6692c0888000000",
-        ],
-        [
-            "Date",
-            "Wed, 20 Oct 2021 08:44:31 GMT",
-            "Content-Type",
-            "application/json; charset=utf-8",
-            "Transfer-Encoding",
-            "chunked",
-            "Connection",
-            "close",
-            "x-request-id",
-            "c977780342afaba2339bc77459d0c3b0",
-            "Content-Encoding",
-            "gzip",
-            "Strict-Transport-Security",
-            "max-age=31536000; includeSubDomains",
-            "CF-Cache-Status",
-            "DYNAMIC",
-            "Expect-CT",
-            'max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"',
-            "Server",
-            "cloudflare",
-            "CF-RAY",
-            "6a10f6e91c5d5482-IST",
-        ],
-    );
+      },
+    },
+    [
+      "Date",
+      "Mon, 15 Jan 2024 08:14:16 GMT",
+      "Content-Type",
+      "application/json; charset=utf-8",
+      "Content-Length",
+      "300",
+      "Connection",
+      "close",
+      "x-request-id",
+      "699334d21a594d590a06e5f2a391cdeb",
+      "CF-Cache-Status",
+      "DYNAMIC",
+      "Content-Security-Policy",
+      "upgrade-insecure-requests",
+      "Referrer-Policy",
+      "strict-origin-when-cross-origin",
+      "Strict-Transport-Security",
+      "max-age=31536000; includeSubDomains",
+      "X-Content-Type-Options",
+      "nosniff",
+      "X-Frame-Options",
+      "SAMEORIGIN",
+      "X-XSS-Protection",
+      "0",
+      "Server",
+      "cloudflare",
+      "CF-RAY",
+      "845caa092a9903bf-BUD",
+    ],
+  );
+
+nock("https://ruling-redbird-23.hasura.app:443", { encodedQueryParams: true })
+  .post("/v1/graphql", {
+    query:
+      "mutation UpdateManyPosts($ids: [uuid!]!, $_set: PostsSetInput!) {\n  updatePosts(where: {id: {_in: $ids}}, _set: $_set) {\n    returning {\n      id\n      title\n      content\n    }\n  }\n}\n",
+    variables: {
+      ids: [
+        "4ec22cb3-b679-4891-a489-3d19cf275ab3",
+        "ae316d48-025a-47db-b4c0-ff4694f52c85",
+      ],
+      _set: { content: "Updated Content" },
+    },
+    operationName: "UpdateManyPosts",
+  })
+  .reply(
+    200,
+    {
+      data: {
+        updatePosts: {
+          returning: [
+            {
+              id: "4ec22cb3-b679-4891-a489-3d19cf275ab3",
+              title: "Aenean ultricies non libero sit amet pellentesque",
+              content: "Updated Content",
+            },
+            {
+              id: "ae316d48-025a-47db-b4c0-ff4694f52c85",
+              title: "Etiam tincidunt ex ut auctor faucibus",
+              content: "Updated Content",
+            },
+          ],
+        },
+      },
+    },
+    [
+      "Date",
+      "Mon, 15 Jan 2024 08:14:17 GMT",
+      "Content-Type",
+      "application/json; charset=utf-8",
+      "Content-Length",
+      "299",
+      "Connection",
+      "close",
+      "x-request-id",
+      "a47bcb3f3bfddb25760ce46236b64635",
+      "CF-Cache-Status",
+      "DYNAMIC",
+      "Content-Security-Policy",
+      "upgrade-insecure-requests",
+      "Referrer-Policy",
+      "strict-origin-when-cross-origin",
+      "Strict-Transport-Security",
+      "max-age=31536000; includeSubDomains",
+      "X-Content-Type-Options",
+      "nosniff",
+      "X-Frame-Options",
+      "SAMEORIGIN",
+      "X-XSS-Protection",
+      "0",
+      "Server",
+      "cloudflare",
+      "CF-RAY",
+      "845caa0db9c0c1b9-BUD",
+    ],
+  );

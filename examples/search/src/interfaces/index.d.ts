@@ -1,22 +1,22 @@
 export interface ICategory {
-    id: string;
-    title: string;
+  id: number;
+  title: string;
 }
 
 export interface IPost {
-    id: string;
-    title: string;
-    content: string;
-    status: "published" | "draft" | "rejected";
-    category: ICategory;
+  id: number;
+  title: string;
+  content: string;
+  status: "published" | "draft" | "rejected";
+  category: { id: number };
 }
 
 export interface IOptionGroup {
-    value: string;
-    label: string | React.ReactNode;
+  value: string;
+  label: string | React.ReactNode;
 }
 
 export interface IOptions {
-    label: string | React.ReactNode;
-    options: IOptionGroup[];
+  label: string | React.ReactNode;
+  options: IOptionGroup[];
 }

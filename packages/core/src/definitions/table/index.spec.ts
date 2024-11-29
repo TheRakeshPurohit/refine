@@ -1,506 +1,639 @@
+import type { CrudFilter, CrudSort } from "../../contexts/data/types";
 import {
-    stringifyTableParams,
-    parseTableParams,
-    parseTableParamsFromQuery,
-    getDefaultSortOrder,
-    getDefaultFilter,
-    mapAntdSorterToCrudSorting,
-    mapAntdFilterToCrudFilter,
-    unionFilters,
-    compareFilters,
+  compareFilters,
+  compareSorters,
+  getDefaultFilter,
+  getDefaultSortOrder,
+  parseTableParams,
+  parseTableParamsFromQuery,
+  stringifyTableParams,
+  unionFilters,
+  unionSorters,
 } from "./";
-import { TablePaginationConfig } from "@components/antd";
-import { CrudSorting, CrudFilters } from "../../interfaces";
 
 describe("definitions/table", () => {
-    it("stringify table params correctly", async () => {
-        const pagination: TablePaginationConfig = {
-            current: 1,
-            pageSize: 10,
-        };
+  it("getDefaultSortOrder", () => {
+    const sorter: CrudSort[] = [
+      {
+        field: "title",
+        order: "asc",
+      },
+      {
+        field: "view",
+        order: "desc",
+      },
+    ];
 
-        const sorter: CrudSorting = [
-            {
-                field: "id",
-                order: "desc",
-            },
-            {
-                field: "title",
-                order: "desc",
-            },
-        ];
+    expect(getDefaultSortOrder("title", sorter)).toEqual("asc");
+    expect(getDefaultSortOrder("view", sorter)).toEqual("desc");
+  });
 
-        const filters: CrudFilters = [
-            {
-                field: "categoryId",
-                operator: "in",
-                value: [1, 2],
-            },
-        ];
+  it("getDefaultSortOrder pass empty sorter", () => {
+    expect(getDefaultSortOrder("title", undefined)).toEqual(undefined);
+  });
 
-        const url = stringifyTableParams({ pagination, sorter, filters });
-        expect(url).toMatchSnapshot();
+  it("getDefaultSortOrder pass different column name", () => {
+    expect(
+      getDefaultSortOrder("title", [
+        {
+          field: "foo",
+          order: "asc",
+        },
+      ]),
+    ).toEqual(undefined);
+  });
+
+  it("getDefaultFilter", () => {
+    const filters: CrudFilter[] = [
+      {
+        field: "title",
+        operator: "contains",
+        value: "test",
+      },
+    ];
+    expect(getDefaultFilter("title", filters, "contains")).toEqual("test");
+  });
+
+  it("getDefaultFilter empty array", () => {
+    const filters: CrudFilter[] = [
+      {
+        field: "title",
+        operator: "contains",
+        value: undefined,
+      },
+    ];
+    expect(getDefaultFilter("title", filters, "contains")).toEqual([]);
+  });
+
+  it("getDefaultFilter default operator", () => {
+    const filters: CrudFilter[] = [
+      {
+        field: "title",
+        operator: "eq",
+        value: "test",
+      },
+    ];
+    expect(getDefaultFilter("title", filters)).toEqual("test");
+  });
+
+  it("stringify table params correctly", async () => {
+    const pagination = {
+      current: 1,
+      pageSize: 10,
+    };
+
+    const sorters: CrudSort[] = [
+      {
+        field: "id",
+        order: "desc",
+      },
+      {
+        field: "title",
+        order: "desc",
+      },
+    ];
+
+    const filters: CrudFilter[] = [
+      {
+        field: "categoryId",
+        operator: "in",
+        value: [1, 2],
+      },
+    ];
+
+    const userDefinedQueryParam = {
+      foo: "bar",
+    };
+
+    const url = stringifyTableParams({
+      pagination,
+      sorters,
+      filters,
+      ...userDefinedQueryParam,
+    });
+    expect(url).toMatchSnapshot();
+  });
+
+  it("stringify table single sort params correctly", async () => {
+    const pagination = {
+      current: 1,
+      pageSize: 10,
+    };
+
+    const sorters: CrudSort[] = [{ field: "id", order: "desc" }];
+    const filters: CrudFilter[] = [
+      {
+        field: "categoryId",
+        operator: "in",
+        value: [1, 2],
+      },
+    ];
+
+    const url = stringifyTableParams({ pagination, sorters, filters });
+    expect(url).toMatchSnapshot();
+  });
+
+  it("parse table params with single sorter correctly", async () => {
+    const url =
+      "?current=1&pageSize=10&sorter[0][field]=id&sorter[0][order]=desc&filters[0][operator]=in&filters[0][field]=categoryId&filters[0][value][0]=1&filters[0][value][1]=2";
+
+    const { parsedCurrent, parsedPageSize, parsedSorter, parsedFilters } =
+      parseTableParams(url);
+
+    expect(parsedCurrent).toBe(1);
+    expect(parsedPageSize).toBe(10);
+    expect(parsedSorter).toStrictEqual([{ field: "id", order: "desc" }]);
+    expect(parsedFilters).toStrictEqual([
+      { field: "categoryId", operator: "in", value: ["1", "2"] },
+    ]);
+  });
+
+  it("sorters should be prioritized over sorter", async () => {
+    const pagination = {
+      current: 1,
+      pageSize: 10,
+    };
+
+    const sorters: CrudSort[] = [{ field: "id", order: "desc" }];
+    const sorter: CrudSort[] = [{ field: "id2", order: "asc" }];
+    const filters: CrudFilter[] = [];
+
+    const url = stringifyTableParams({
+      pagination,
+      sorters,
+      sorter,
+      filters,
     });
 
-    it("stringify table single sort params correctly", async () => {
-        const pagination: TablePaginationConfig = {
-            current: 1,
-            pageSize: 10,
-        };
+    expect(url).toMatchSnapshot();
+  });
 
-        const sorter: CrudSorting = [{ field: "id", order: "desc" }];
-        const filters: CrudFilters = [
+  it("parse table params with advanced query object", async () => {
+    const query = {
+      current: 1,
+      pageSize: 10,
+      sorter: [
+        { field: "id", order: "asc" },
+        { field: "firstName", order: "desc" },
+      ],
+      filters: [
+        { field: "id", operator: "eq", value: "1" },
+        {
+          operator: "or",
+          value: [
             {
-                field: "categoryId",
-                operator: "in",
-                value: [1, 2],
-            },
-        ];
-
-        const url = stringifyTableParams({ pagination, sorter, filters });
-        expect(url).toMatchSnapshot();
-    });
-
-    it("parse table params with single sorter correctly", async () => {
-        const url =
-            "?current=1&pageSize=10&categoryId__in[]=1&categoryId__in[]=2&sort[]=id&order[]=desc";
-
-        const { parsedCurrent, parsedPageSize, parsedSorter, parsedFilters } =
-            parseTableParams(url);
-
-        expect(parsedCurrent).toBe(1);
-        expect(parsedPageSize).toBe(10);
-        expect(parsedSorter).toStrictEqual([{ field: "id", order: "desc" }]);
-        expect(parsedFilters).toStrictEqual([
-            { field: "categoryId", operator: "in", value: ["1", "2"] },
-        ]);
-    });
-
-    fit("parse table params with advanced query object", async () => {
-        const query = {
-            current: "1",
-            pageSize: "10",
-            id__eq: "1",
-            sort: ["id", "firstName"],
-            order: ["asc", "desc"],
-        };
-
-        const { parsedCurrent, parsedPageSize, parsedSorter, parsedFilters } =
-            parseTableParamsFromQuery(query);
-
-        expect(parsedCurrent).toBe(1);
-        expect(parsedPageSize).toBe(10);
-        expect(parsedSorter).toStrictEqual([
-            { field: "id", order: "asc" },
-            { field: "firstName", order: "desc" },
-        ]);
-        expect(parsedFilters).toStrictEqual([
-            { field: "id", operator: "eq", value: "1" },
-        ]);
-    });
-
-    it("getDefaultSortOrder", () => {
-        const sorter: CrudSorting = [
-            {
-                field: "title",
-                order: "asc",
+              field: "age",
+              operator: "lt",
+              value: "18",
             },
             {
-                field: "view",
-                order: "desc",
+              field: "age",
+              operator: "gt",
+              value: "20",
             },
-        ];
+          ],
+        },
+      ],
+    };
 
-        expect(getDefaultSortOrder("title", sorter)).toEqual("ascend");
-    });
+    const { parsedCurrent, parsedPageSize, parsedSorter, parsedFilters } =
+      parseTableParamsFromQuery(query);
 
-    it("getDefaultFilter", () => {
-        const filters: CrudFilters = [
+    expect(parsedCurrent).toBe(1);
+    expect(parsedPageSize).toBe(10);
+    expect(parsedSorter).toStrictEqual([
+      { field: "id", order: "asc" },
+      { field: "firstName", order: "desc" },
+    ]);
+    expect(parsedFilters).toStrictEqual([
+      { field: "id", operator: "eq", value: "1" },
+      {
+        operator: "or",
+        value: [
+          {
+            field: "age",
+            operator: "lt",
+            value: "18",
+          },
+          {
+            field: "age",
+            operator: "gt",
+            value: "20",
+          },
+        ],
+      },
+    ]);
+  });
+
+  it("unionFilters should override same filters", () => {
+    expect(
+      unionFilters(
+        [
+          {
+            field: "foo",
+            operator: "in",
+            value: "permenant",
+          },
+        ],
+
+        [
+          {
+            field: "foo",
+            operator: "in",
+            value: "crud",
+          },
+          {
+            field: "bar",
+            operator: "in",
+            value: "crud",
+          },
+        ],
+      ),
+    ).toMatchInlineSnapshot(`
+            [
+              {
+                "field": "foo",
+                "operator": "in",
+                "value": "permenant",
+              },
+              {
+                "field": "bar",
+                "operator": "in",
+                "value": "crud",
+              },
+            ]
+        `);
+  });
+
+  it("unionFilters should override even when filter value is null but should not keep it in the end result", () => {
+    expect(
+      unionFilters(
+        [],
+        [
+          {
+            field: "foo",
+            operator: "in",
+            value: null,
+          },
+          {
+            field: "bar",
+            operator: "in",
+            value: undefined,
+          },
+          {
+            field: "baz",
+            operator: "in",
+            value: "prev",
+          },
+        ],
+      ),
+    ).toMatchInlineSnapshot(`
+            [
+              {
+                "field": "baz",
+                "operator": "in",
+                "value": "prev",
+              },
+            ]
+        `);
+  });
+
+  it("compareFilters filters are the same if their field and operator are the same", () => {
+    expect(
+      compareFilters(
+        {
+          field: "foo",
+          operator: "in",
+          value: "left",
+        },
+        {
+          field: "foo",
+          operator: "in",
+          value: "right",
+        },
+      ),
+    ).toBe(true);
+
+    expect(
+      compareFilters(
+        {
+          field: "foo",
+          operator: "in",
+          value: "test",
+        },
+        {
+          field: "foo",
+          operator: "contains",
+          value: "test",
+        },
+      ),
+    ).toBe(false);
+  });
+
+  it("compareFilters return correct result when `or` is used", () => {
+    expect(
+      compareFilters(
+        {
+          operator: "or",
+          value: [
             {
-                field: "title",
-                operator: "contains",
-                value: "test",
+              field: "name",
+              operator: "eq",
+              value: "test",
             },
-        ];
-        expect(getDefaultFilter("title", filters, "contains")).toEqual("test");
-    });
-
-    it("getDefaultFilter empty array", () => {
-        const filters: CrudFilters = [
+          ],
+        },
+        {
+          operator: "or",
+          value: [
             {
-                field: "title",
-                operator: "contains",
-                value: undefined,
+              field: "created_at",
+              operator: "gte",
+              value: "2022-01-01",
             },
-        ];
-        expect(getDefaultFilter("title", filters, "contains")).toEqual([]);
-    });
+          ],
+        },
+      ),
+    ).toBe(true);
 
-    it("getDefaultFilter default operator", () => {
-        const filters: CrudFilters = [
+    expect(
+      compareFilters(
+        {
+          operator: "or",
+          value: [
             {
-                field: "title",
-                operator: "eq",
-                value: "test",
+              field: "name",
+              operator: "eq",
+              value: "test",
             },
-        ];
-        expect(getDefaultFilter("title", filters)).toEqual("test");
-    });
+          ],
+        },
+        {
+          field: "created_at",
+          operator: "gte",
+          value: "2022-01-01",
+        },
+      ),
+    ).toBe(false);
+  });
 
-    it("mapAntdSorterToCrudSorting", () => {
-        expect(
-            mapAntdSorterToCrudSorting({
-                field: "title",
-                order: "descend",
+  it("unionFilters should override `or` filter", () => {
+    const union = unionFilters(
+      // permanent filters
+      [],
+      // new filters
+      [
+        {
+          field: "other-field",
+          operator: "in",
+          value: "crud",
+        },
+        {
+          operator: "or",
+          value: [
+            {
+              field: "created_at",
+              operator: "contains",
+              value: "2022",
+            },
+          ],
+        },
+      ],
+      // prev filters
+      [
+        {
+          operator: "or",
+          value: [
+            {
+              field: "name",
+              operator: "eq",
+              value: "test",
+            },
+          ],
+        },
+      ],
+    );
+
+    // does not include previous `or`
+    expect(union).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          operator: "or",
+          value: expect.arrayContaining([
+            expect.objectContaining({
+              field: "name",
+              operator: "eq",
+              value: "test",
             }),
-        ).toMatchInlineSnapshot(`
-            Array [
-              Object {
-                "field": "title",
-                "order": "desc",
-              },
-            ]
-        `);
-    });
+          ]),
+        }),
+      ]),
+    );
 
-    it("mapAntdSorterToCrudSorting with sorting priority", () => {
-        expect(
-            mapAntdSorterToCrudSorting([
-                {
-                    field: "id",
-                    order: "descend",
-                    column: {
-                        sorter: {
-                            multiple: 2,
-                        },
-                    },
-                },
-                {
-                    field: "title",
-                    order: "descend",
-                    column: {
-                        sorter: {
-                            multiple: 1,
-                        },
-                    },
-                },
-            ]),
-        ).toMatchInlineSnapshot(`
-            Array [
-              Object {
-                "field": "title",
-                "order": "desc",
-              },
-              Object {
-                "field": "id",
-                "order": "desc",
-              },
-            ]
-        `);
-    });
+    // includes new `or` and new filters
+    expect(union).toMatchObject([
+      {
+        field: "other-field",
+        operator: "in",
+        value: "crud",
+      },
+      {
+        operator: "or",
+        value: [
+          {
+            field: "created_at",
+            operator: "contains",
+            value: "2022",
+          },
+        ],
+      },
+    ]);
+  });
 
-    it("mapAntdSorterToCrudSorting for array and columnKey", () => {
-        expect(
-            mapAntdSorterToCrudSorting([
-                {
-                    columnKey: "title",
-                    field: "title",
-                    order: "descend",
-                },
-            ]),
-        ).toMatchInlineSnapshot(`
-            Array [
-              Object {
-                "field": "title",
-                "order": "desc",
-              },
-            ]
-        `);
-    });
+  it("unionFilters should remove `or` filter if value is empty array", () => {
+    const union = unionFilters(
+      // permanent filters
+      [],
+      // new filters
+      [
+        {
+          field: "other-field",
+          operator: "in",
+          value: "crud",
+        },
+        {
+          operator: "or",
+          value: [],
+        },
+      ],
+      // prev filters
+      [
+        {
+          operator: "or",
+          value: [
+            {
+              field: "name",
+              operator: "eq",
+              value: "test",
+            },
+          ],
+        },
+      ],
+    );
 
-    it("mapAntdFilterToCrudFilter", () => {
-        expect(
-            mapAntdFilterToCrudFilter(
-                {
-                    foo: ["bar", "baz"],
-                },
-                [],
-            ),
-        ).toMatchInlineSnapshot(`
-            Array [
-              Object {
+    expect(union).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          operator: "or",
+        }),
+      ]),
+    );
+  });
+
+  it("unionFilters should keep `or` filter if it's untouched", () => {
+    const union = unionFilters(
+      // permanent filters
+      [],
+      // new filters
+      [
+        {
+          field: "other-field",
+          operator: "in",
+          value: "crud",
+        },
+      ],
+      // prev filters
+      [
+        {
+          operator: "or",
+          value: [
+            {
+              field: "name",
+              operator: "eq",
+              value: "test",
+            },
+          ],
+        },
+      ],
+    );
+
+    expect(union).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          operator: "or",
+        }),
+      ]),
+    );
+  });
+
+  it("unionSorters should override same sorter", () => {
+    expect(
+      unionSorters(
+        [
+          {
+            field: "foo",
+            order: "asc",
+          },
+        ],
+
+        [
+          {
+            field: "foo",
+            order: "asc",
+          },
+          {
+            field: "bar",
+            order: "asc",
+          },
+        ],
+      ),
+    ).toMatchInlineSnapshot(`
+            [
+              {
                 "field": "foo",
-                "operator": "in",
-                "value": Array [
-                  "bar",
-                  "baz",
-                ],
+                "order": "asc",
               },
-            ]
-        `);
-    });
-
-    it("mapAntdFilterToCrudFilter with non array", () => {
-        expect(
-            mapAntdFilterToCrudFilter(
-                {
-                    foo: "bar",
-                },
-                [],
-            ),
-        ).toMatchInlineSnapshot(`
-            Array [
-              Object {
-                "field": "foo",
-                "operator": "eq",
-                "value": "bar",
-              },
-            ]
-        `);
-    });
-
-    it("mapAntdFilterToCrudFilter with value 0", () => {
-        expect(
-            mapAntdFilterToCrudFilter(
-                {
-                    foo: [0],
-                },
-                [],
-            ),
-        ).toMatchInlineSnapshot(`
-            Array [
-              Object {
-                "field": "foo",
-                "operator": "in",
-                "value": Array [
-                  0,
-                ],
-              },
-            ]
-        `);
-    });
-
-    it("mapAntdFilterToCrudFilter with in operator and null value", () => {
-        expect(
-            mapAntdFilterToCrudFilter(
-                {
-                    foo: null,
-                },
-                [
-                    {
-                        field: "foo",
-                        operator: "in",
-                        value: ["1"],
-                    },
-                ],
-            ),
-        ).toMatchInlineSnapshot(`
-            Array [
-              Object {
-                "field": "foo",
-                "operator": "in",
-                "value": null,
-              },
-            ]
-        `);
-    });
-
-    it("mapAntdFilterToCrudFilter with eq operator and null value", () => {
-        expect(
-            mapAntdFilterToCrudFilter(
-                {
-                    foo: null,
-                },
-                [
-                    {
-                        field: "foo",
-                        operator: "eq",
-                        value: "1",
-                    },
-                ],
-            ),
-        ).toMatchInlineSnapshot(`
-            Array [
-              Object {
-                "field": "foo",
-                "operator": "eq",
-                "value": null,
-              },
-            ]
-        `);
-    });
-
-    it("unionFilters puts higher priority filters at the end", () => {
-        expect(
-            unionFilters(
-                [
-                    {
-                        field: "foo",
-                        operator: "in",
-                        value: "permenant",
-                    },
-                ],
-                [
-                    {
-                        field: "bar",
-                        operator: "in",
-                        value: "crud",
-                    },
-                ],
-                [
-                    {
-                        field: "baz",
-                        operator: "in",
-                        value: "prev",
-                    },
-                ],
-            ),
-        ).toMatchInlineSnapshot(`
-            Array [
-              Object {
-                "field": "baz",
-                "operator": "in",
-                "value": "prev",
-              },
-              Object {
+              {
                 "field": "bar",
-                "operator": "in",
-                "value": "crud",
-              },
-              Object {
-                "field": "foo",
-                "operator": "in",
-                "value": "permenant",
+                "order": "asc",
               },
             ]
         `);
-    });
+  });
 
-    it("unionFilters should override same filters", () => {
-        expect(
-            unionFilters(
-                [
-                    {
-                        field: "foo",
-                        operator: "in",
-                        value: "permenant",
-                    },
-                ],
-                [
-                    {
-                        field: "foo",
-                        operator: "in",
-                        value: "crud",
-                    },
-                    {
-                        field: "bar",
-                        operator: "in",
-                        value: "crud",
-                    },
-                ],
-                [
-                    {
-                        field: "bar",
-                        operator: "in",
-                        value: "prev",
-                    },
-                    {
-                        field: "baz",
-                        operator: "in",
-                        value: "prev",
-                    },
-                ],
-            ),
-        ).toMatchInlineSnapshot(`
-            Array [
-              Object {
-                "field": "baz",
-                "operator": "in",
-                "value": "prev",
-              },
-              Object {
+  it("unionSorters should override even when sorter value is null but should not keep it in the end result", () => {
+    expect(
+      unionSorters(
+        [],
+        [
+          {
+            field: "bar",
+            order: "asc",
+          },
+          {
+            field: "foo",
+            order: "asc",
+          },
+        ],
+      ),
+    ).toMatchInlineSnapshot(`
+            [
+              {
                 "field": "bar",
-                "operator": "in",
-                "value": "crud",
+                "order": "asc",
               },
-              Object {
+              {
                 "field": "foo",
-                "operator": "in",
-                "value": "permenant",
+                "order": "asc",
               },
             ]
         `);
-    });
+  });
 
-    it("unionFilters should override even when filter value is null but should not keep it in the end result", () => {
-        expect(
-            unionFilters(
-                [],
-                [
-                    {
-                        field: "foo",
-                        operator: "in",
-                        value: null,
-                    },
-                    {
-                        field: "bar",
-                        operator: "in",
-                        value: undefined,
-                    },
-                ],
-                [
-                    {
-                        field: "bar",
-                        operator: "in",
-                        value: "prev",
-                    },
-                    {
-                        field: "baz",
-                        operator: "in",
-                        value: "prev",
-                    },
-                ],
-            ),
-        ).toMatchInlineSnapshot(`
-            Array [
-              Object {
-                "field": "baz",
-                "operator": "in",
-                "value": "prev",
-              },
-            ]
-        `);
-    });
+  it("compareSorters sorters are the same if their field are the same", () => {
+    expect(
+      compareSorters(
+        {
+          field: "foo",
+          order: "asc",
+        },
+        {
+          field: "foo",
+          order: "asc",
+        },
+      ),
+    ).toBe(true);
 
-    it("compareFilters filters are the same if their field and operator are the same", () => {
-        expect(
-            compareFilters(
-                {
-                    field: "foo",
-                    operator: "in",
-                    value: "left",
-                },
-                {
-                    field: "foo",
-                    operator: "in",
-                    value: "right",
-                },
-            ),
-        ).toBe(true);
+    expect(
+      compareSorters(
+        {
+          field: "foo",
+          order: "asc",
+        },
+        {
+          field: "foo",
+          order: "desc",
+        },
+      ),
+    ).toBe(true);
+  });
 
-        expect(
-            compareFilters(
-                {
-                    field: "foo",
-                    operator: "in",
-                    value: "test",
-                },
-                {
-                    field: "foo",
-                    operator: "contains",
-                    value: "test",
-                },
-            ),
-        ).toBe(false);
+  it("parseTableParams default sorter and filters", () => {
+    expect(parseTableParams("?current=1&pageSize=10")).toStrictEqual({
+      parsedCurrent: 1,
+      parsedFilters: [],
+      parsedPageSize: 10,
+      parsedSorter: [],
     });
+  });
+
+  it("stringifyTableParams default pagination", () => {
+    expect(
+      stringifyTableParams({
+        pagination: undefined,
+        sorters: [],
+        filters: [],
+      }),
+    ).toEqual("");
+  });
 });

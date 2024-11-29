@@ -1,13 +1,17 @@
 ---
 id: google-auth
 title: Google Auth
+example-tags: [auth-provider]
 ---
 
-[View Source](https://github.com/pankod/refine/tree/master/examples/authProvider/googleLogin)
+You can use Google Login to control access and provide identity for your app. This example will guide you through how to connect Google Login into your project using Refine.
 
-<iframe src="https://codesandbox.io/embed/refine-google-login-example-99wq9?autoresize=1&fontsize=14&theme=dark&view=preview"
-    style={{width: "100%", height:"80vh", border: "0px", borderRadius: "8px", overflow:"hidden"}}
-    title="refine-google-login-example"
-    allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
-    sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
-></iframe>
+:::note
+
+If you are developing your own OAuth application, it's important to add the URLs of both your deployed application and your local development to the list of allowed origins in the OAuth app settings. Failure to do so can cause the app to fail.
+
+For more detailed guidance, you may find this helpful [video tutorial](https://www.youtube.com/watch?v=HtJKUQXmtok).
+
+:::
+
+<CodeSandboxExample path="auth-google-login" />

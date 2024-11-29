@@ -1,45 +1,101 @@
-import { Refine } from "@pankod/refine";
-import dataProvider from "@pankod/refine-simple-rest";
-import routerProvider from "@pankod/refine-react-router";
-
-import "@pankod/refine/dist/styles.min.css";
-
-import { PostList, PostCreate, PostEdit, PostShow } from "pages/posts";
+import { GitHubBanner, Refine } from "@refinedev/core";
 import {
-    CategoryList,
-    CategoryCreate,
-    CategoryEdit,
-    CategoryShow,
-} from "pages/categories";
+  useNotificationProvider,
+  ThemedLayoutV2,
+  ErrorComponent,
+  RefineThemes,
+} from "@refinedev/antd";
+import dataProvider from "@refinedev/simple-rest";
+import routerProvider, {
+  NavigateToResource,
+  UnsavedChangesNotifier,
+  DocumentTitleHandler,
+} from "@refinedev/react-router-v6";
+import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 
-import { Header } from "components";
+import { ConfigProvider, App as AntdApp } from "antd";
+import "@refinedev/antd/dist/reset.css";
+
+import { PostList, PostCreate, PostEdit, PostShow } from "./pages/posts";
+import {
+  CategoryList,
+  CategoryCreate,
+  CategoryEdit,
+  CategoryShow,
+} from "./pages/categories";
+
+import { Header } from "./components";
 
 const API_URL = "https://api.fake-rest.refine.dev";
 
 const App: React.FC = () => {
-    return (
-        <Refine
+  return (
+    <BrowserRouter>
+      <GitHubBanner />
+      <ConfigProvider theme={RefineThemes.Blue}>
+        <AntdApp>
+          <Refine
             dataProvider={dataProvider(API_URL)}
             routerProvider={routerProvider}
-            Header={Header}
             resources={[
-                {
-                    name: "posts",
-                    list: PostList,
-                    create: PostCreate,
-                    edit: PostEdit,
-                    show: PostShow,
-                },
-                {
-                    name: "categories",
-                    list: CategoryList,
-                    create: CategoryCreate,
-                    edit: CategoryEdit,
-                    show: CategoryShow,
-                },
+              {
+                name: "posts",
+                list: "/posts",
+                show: "/posts/show/:id",
+                create: "/posts/create",
+                edit: "/posts/edit/:id",
+              },
+              {
+                name: "categories",
+                list: "/categories",
+                show: "/categories/show/:id",
+                create: "/categories/create",
+                edit: "/categories/edit/:id",
+              },
             ]}
-        />
-    );
+            notificationProvider={useNotificationProvider}
+            options={{
+              warnWhenUnsavedChanges: true,
+              syncWithLocation: true,
+            }}
+          >
+            <Routes>
+              <Route
+                element={
+                  <ThemedLayoutV2 Header={Header}>
+                    <Outlet />
+                  </ThemedLayoutV2>
+                }
+              >
+                <Route
+                  index
+                  element={<NavigateToResource resource="posts" />}
+                />
+
+                <Route path="posts">
+                  <Route index element={<PostList />} />
+                  <Route path="show/:id" element={<PostShow />} />
+                  <Route path="create" element={<PostCreate />} />
+                  <Route path="edit/:id" element={<PostEdit />} />
+                </Route>
+
+                <Route path="categories">
+                  <Route index element={<CategoryList />} />
+                  <Route path="show/:id" element={<CategoryShow />} />
+                  <Route path="create" element={<CategoryCreate />} />
+                  <Route path="edit/:id" element={<CategoryEdit />} />
+                </Route>
+
+                <Route path="*" element={<ErrorComponent />} />
+              </Route>
+            </Routes>
+            <UnsavedChangesNotifier />
+            <DocumentTitleHandler />
+          </Refine>
+        </AntdApp>
+      </ConfigProvider>
+    </BrowserRouter>
+  );
 };
 
 export default App;
